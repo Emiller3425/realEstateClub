@@ -32,14 +32,14 @@ export default function App() {
           {/* Login button */}
           {loggedIn ? (
             <button
-              className="bg-white text-blue-500 py-2 px-4 rounded-lg"
+              className="bg-white text-blue-500 py-2 px-4 rounded-lg btn"
               onClick={handleLogout}
             >
               Logout
             </button>
           ) : (
             <button
-              className="bg-white text-blue-500 py-2 px-4 rounded-lg"
+              className="bg-white text-blue-500 py-2 px-4 rounded-lg btn"
               onClick={handleLogin}
             >
               Login
@@ -85,7 +85,7 @@ export default function App() {
       </div>
 
       {/* Main content */}
-      <div className="flex justify-center mt-4">
+      <div className="p-4 flex justify-center">
         {/* Content based on activeTab */}
         {activeTab === 'announcements' && (
           <div>

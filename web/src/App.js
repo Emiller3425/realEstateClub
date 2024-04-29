@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import 'tailwindcss/tailwind.css';
 import './output.css';
-import ghostButton from './components/ghostButton'; // Importing the ghostbutton component
 import realEstateLogo from './images/realEstateLogo.png'; // Importing the logo image
-import { getUsers, db, updateUserData, addNewProfile, storage } from'./firebase'; // Importing the firebase module
+import { getUsers } from './firebase'; // Importing the firebase module
+import Announcements from './tabs/announcements';
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [loggedInUser, setLoggedInUser] = useState({});
-  const [activeTab, setActiveTab] = useState('announcements');
   const [userList, setUserList] = useState([]);
+  const [activeTab, setActiveTab] = useState('announcements');
 
   useEffect(() => {
     async function fetchUsers() {
@@ -38,11 +37,11 @@ export default function App() {
         <div className="flex items-center">
           <img src={realEstateLogo} alt="Real Estate Logo" className="h-20 mr-2" />
           <div>
-          { /* Welcome Message */}
-          <h1 className="text-3xl absolute p-4 text-center transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"> Welcome to Real Estate Club GVSU</h1>
+            {/* Welcome Message */}
+            <h1 className="text-3xl absolute p-4 text-center transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"> Welcome to Real Estate Club GVSU</h1>
+          </div>
         </div>
-        </div>
-        <div>
+        <div className="mr-4">
           {/* Login button */}
           {loggedIn ? (
             <button
@@ -63,7 +62,7 @@ export default function App() {
       </div>
 
       {/* Tabs */}
-      <div className="flex justify-between w-full"> {/* Modified here */}
+      <div className="flex justify-between w-full">
         <button
           className={`w-full px-4 py-4  ${
             activeTab === 'announcements' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
@@ -102,20 +101,14 @@ export default function App() {
           }`}
           onClick={() => setActiveTab('userList')}
         >
-          userList
+          User List
         </button>
       </div>
-      
 
       {/* Main content */}
       <div className="p-4 flex justify-center">
         {/* Content based on activeTab */}
-        {activeTab === 'announcements' && (
-          <div>
-            {/* Add content for Announcements tab */}
-            <p>Announcements content goes here.</p>
-          </div>
-        )}
+        {activeTab === 'announcements' && <Announcements />}
         {activeTab === 'calendar' && (
           <div>
             {/* Add content for Calendar tab */}

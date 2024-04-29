@@ -15,7 +15,7 @@ function Announcements() {
   const [underlineActive, setUnderlineActive] = useState(false);
 
   const handleInlineStyleToggle = (inlineStyle) => {
-    editorRef.current.focus(); // Add this line to focus the editor
+    editorRef.current.focus(); // Add this line to focus the editor:wwq
     const newState = RichUtils.toggleInlineStyle(editorState, inlineStyle);
     console.log('New editor state after inline style change:', newState.getCurrentContent().getPlainText());
     setEditorState(newState);

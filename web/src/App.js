@@ -4,7 +4,7 @@ import 'tailwindcss/tailwind.css';
 import './output.css';
 import realEstateLogo from './images/realEstateLogo.png'; // Importing the logo image
 import { getUsers } from './firebase'; // Importing the firebase module
-import Announcements from './tabs/announcements';
+import Announcements from './components/Announcements';
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);

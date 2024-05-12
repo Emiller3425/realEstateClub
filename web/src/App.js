@@ -5,6 +5,9 @@ import './output.css';
 import realEstateLogo from './images/realEstateLogo.png'; // Importing the logo image
 import { getUsers } from './firebase'; // Importing the firebase module
 import Announcements from './components/Announcements';
+import Calendar from './components/Calendar';
+import Blog from './components/Blog';
+import Merchandise from './components/Merchandise';
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -109,24 +112,9 @@ export default function App() {
       <div className="p-4 flex justify-center">
         {/* Content based on activeTab */}
         {activeTab === 'announcements' && <Announcements />}
-        {activeTab === 'calendar' && (
-          <div>
-            {/* Add content for Calendar tab */}
-            <p>Calendar content goes here.</p>
-          </div>
-        )}
-        {activeTab === 'blog' && (
-          <div>
-            {/* Add content for Blog tab */}
-            <p>Blog content goes here.</p>
-          </div>
-        )}
-        {activeTab === 'merch' && (
-          <div>
-            {/* Add content for Merch tab */}
-            <p>Merch content goes here.</p>
-          </div>
-        )}
+        {activeTab === 'calendar' && <Calendar />}
+        {activeTab === 'blog' && <Blog />}
+        {activeTab === 'merch' && <Merchandise />}
         {/* Render user list */}
         {activeTab === 'userList' && (
           <div>

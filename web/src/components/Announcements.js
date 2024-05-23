@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Editor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js';
 import 'draft-js/dist/Draft.css';
 
@@ -19,33 +19,18 @@ const FONT_SIZES = [
 const initialEditorState = EditorState.createEmpty();
 
 export default function Announcements() {
-  const [editorState, setEditorState] = React.useState(initialEditorState);
+  const [editorState, setEditorState] = useState(initialEditorState);
+  const [fontSize, setFontSize] = useState(FONT_SIZES[0].value); // Manage font size state
   const editorRef = useRef(null);
-
-  const getCurrentInlineStyle = () => {
-    const currentSelection = editorState.getSelection();
-    if (!currentSelection.isCollapsed()) {
-      const contentState = editorState.getCurrentContent();
-      const startKey = currentSelection.getStartKey();
-      const blockText = contentState.getBlockForKey(startKey).getText();
-      const startOffset = currentSelection.getStartOffset();
-      const endOffset = currentSelection.getEndOffset();
-      const selectedText = blockText.slice(startOffset, endOffset);
-      let style = '';
-      INLINE_STYLES.forEach((inlineStyle) => {
-        style = selectedText.includes(inlineStyle.label) ? inlineStyle.style : style;
-      });
-      return style;
-    }
-    return '';
-  };
 
   const handleInlineStyleToggle = (inlineStyle) => {
     setEditorState(RichUtils.toggleInlineStyle(editorState, inlineStyle));
   };
 
-  const handleFontSizeChange = (fontSize) => {
-    setEditorState(RichUtils.toggleInlineStyle(editorState, `FONT_SIZE_${fontSize}`));
+  const handleFontSizeChange = (event) => {
+    const newFontSize = event.target.value;
+    setFontSize(newFontSize);
+    setEditorState(RichUtils.toggleInlineStyle(editorState, `FONT_SIZE_${newFontSize}`));
   };
 
   const handleKeyCommand = (command, editorState) => {
@@ -74,7 +59,7 @@ export default function Announcements() {
         {INLINE_STYLES.map(({ label, style }) => (
           <button
             key={style}
-            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${getCurrentInlineStyle().includes(style) ? 'text-white' : ''}`}
+            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${editorState.getCurrentInlineStyle().has(style) ? 'text-white' : ''}`}
             onClick={() => handleInlineStyleToggle(style)}
           >
             {label}
@@ -82,7 +67,8 @@ export default function Announcements() {
         ))}
         <select
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          onChange={(e) => handleFontSizeChange(e.target.value)}
+          value={fontSize} // Use the value prop
+          onChange={handleFontSizeChange}
         >
           {FONT_SIZES.map(({ value, label }) => (
             <option key={value} value={value}>

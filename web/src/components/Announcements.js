@@ -20,17 +20,25 @@ const initialEditorState = EditorState.createEmpty();
 
 export default function Announcements() {
   const [editorState, setEditorState] = useState(initialEditorState);
-  const [fontSize, setFontSize] = useState(FONT_SIZES[0].value); // Manage font size state
+  const [fontSize, setFontSize] = useState(FONT_SIZES[0].value);
   const editorRef = useRef(null);
 
+  const focusEditor = () => {
+    if (editorRef.current) {
+      editorRef.current.focus();
+    }
+  };
+
   const handleInlineStyleToggle = (inlineStyle) => {
-    setEditorState(RichUtils.toggleInlineStyle(editorState, inlineStyle));
+    setEditorState((prevState) => RichUtils.toggleInlineStyle(prevState, inlineStyle));
+    focusEditor();
   };
 
   const handleFontSizeChange = (event) => {
     const newFontSize = event.target.value;
     setFontSize(newFontSize);
-    setEditorState(RichUtils.toggleInlineStyle(editorState, `FONT_SIZE_${newFontSize}`));
+    setEditorState((prevState) => RichUtils.toggleInlineStyle(prevState, `FONT_SIZE_${newFontSize}`));
+    focusEditor();
   };
 
   const handleKeyCommand = (command, editorState) => {
@@ -53,21 +61,32 @@ export default function Announcements() {
     return getDefaultKeyBinding(e);
   };
 
+  const handleEditorChange = (newState) => {
+    setEditorState(newState);
+  };
+
+  const currentInlineStyle = editorState.getCurrentInlineStyle();
+
   return (
     <div className="p-4">
       <div className="flex items-center space-x-4">
         {INLINE_STYLES.map(({ label, style }) => (
           <button
             key={style}
-            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${editorState.getCurrentInlineStyle().has(style) ? 'text-white' : ''}`}
-            onClick={() => handleInlineStyleToggle(style)}
+            className={`${
+              currentInlineStyle.has(style) ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-700'
+            } text-white font-bold py-2 px-4 rounded`}
+            onMouseDown={(e) => {
+              e.preventDefault(); // Prevent losing focus
+              handleInlineStyleToggle(style);
+            }}
           >
             {label}
           </button>
         ))}
         <select
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          value={fontSize} // Use the value prop
+          value={fontSize}
           onChange={handleFontSizeChange}
         >
           {FONT_SIZES.map(({ value, label }) => (
@@ -77,13 +96,11 @@ export default function Announcements() {
           ))}
         </select>
       </div>
-      <div className="border border-gray-400 p-4 mt-4">
+      <div className="border border-gray-400 p-4 mt-4 h-64 overflow-y-auto">
         <Editor
           ref={editorRef}
           editorState={editorState}
-          onChange={(newState) => {
-            setEditorState(newState);
-          }}
+          onChange={handleEditorChange}
           handleKeyCommand={handleKeyCommand}
           keyBindingFn={mapKeyToEditorCommand}
         />

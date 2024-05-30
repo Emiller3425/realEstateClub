@@ -1,14 +1,31 @@
+import React, { useState, useEffect } from 'react';
+
 const Calendar = () => {
-    return (
-      <div>
-        <h2>My Google Calendar</h2>
-        <iframe
-          src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FDetroit&bgcolor=%23ffffff&src=ZW1pbGxlcjM0MjVAZ21haWwuY29t&src=ZTVmNDkxMTQ0YzBkYjg5NDAxODgwODM1Y2FjMGIxZjM4OGM0NjNlNTEzNDhhZjljYTYzMTJjYzRhYTA4ZGJiOEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=YWRkcmVzc2Jvb2sjY29udGFjdHNAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&color=%23039BE5&color=%23EF6C00&color=%2333B679&color=%230B8043"
-          style={{ border: 4, width: '800px', height: '600px' }}
-          frameBorder="0"
-        ></iframe>
-      </div>
-    );
-  };
-  
-  export default Calendar;
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const iframe = document.querySelector('iframe');
+    const handleLoad = () => {
+      setIsLoaded(true);
+    };
+
+    iframe.addEventListener('load', handleLoad);
+
+    return () => {
+      iframe.removeEventListener('load', handleLoad);
+    };
+  }, []);
+
+  return (
+    <div>
+      {!isLoaded && <div>Loading...</div>}
+      <iframe
+        src="https://calendar.google.com/calendar/embed?src=emiller3425%40gmail.com&ctz=America%2FDetroit"
+        style={{ border: 4, width: '800px', height: '600px' }}
+        frameBorder="0"
+      ></iframe>
+    </div>
+  );
+};
+
+export default Calendar;

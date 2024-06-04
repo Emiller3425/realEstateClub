@@ -70,7 +70,7 @@ function App() {
         <Tabs />
 
         {/* Main content */}
-        <div className="p-4 flex justify-center">
+        <div className="flex justify-center">
           <Routes>
             <Route path="/" element={<Announcements />} />
             <Route path="/calendar" element={<Calendar />} />

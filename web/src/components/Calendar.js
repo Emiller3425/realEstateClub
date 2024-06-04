@@ -1,28 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const Calendar = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const iframeRef = useRef(null);
 
   useEffect(() => {
-    const iframe = document.querySelector('iframe');
+    const iframe = iframeRef.current;
     const handleLoad = () => {
       setIsLoaded(true);
     };
 
-    iframe.addEventListener('load', handleLoad);
+    if (iframe) {
+      iframe.addEventListener('load', handleLoad);
+    }
 
     return () => {
-      iframe.removeEventListener('load', handleLoad);
+      if (iframe) {
+        iframe.removeEventListener('load', handleLoad);
+      }
     };
   }, []);
 
   return (
-    <div>
-      {!isLoaded && <div>Loading...</div>}
+    <div style={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+      {!isLoaded && (
+        <div style={{ position: 'absolute' }}>Loading...</div>
+      )}
       <iframe
+        ref={iframeRef}
         src="https://calendar.google.com/calendar/embed?src=emiller3425%40gmail.com&ctz=America%2FDetroit"
-        style={{ border: 4, width: '800px', height: '600px' }}
-        frameBorder="0"
+        style={{
+          width: '100vw',
+          height: '100vh',
+          filter: 'invert(0.9) saturate(0.5) hue-rotate(145deg)',
+          display: isLoaded ? 'block' : 'none'
+        }}
       ></iframe>
     </div>
   );

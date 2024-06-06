@@ -1,0 +1,16 @@
+{
+  "name": "your-project",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"npm:start-web\" \"npm:start-backend\"",
+    "start-web": "npm --prefix web start",
+    "start-backend": "npm --prefix backend start",
+    "build": "npm run build-web && npm run build-backend",
+    "build-web": "npm --prefix web run build",
+    "build-backend": "npm --prefix backend run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

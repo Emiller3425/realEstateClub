@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.db = void 0;
 const firebase_admin_1 = __importDefault(require("firebase-admin"));
 // Initialize the Firebase app with a service account, granting admin privileges
-const serviceAccount = require('./config/backend/config/realestateclub-584d7-firebase-adminsdk-5wrv6-ac5b7aaa7b.json');
+const serviceAccount = require('../config/realestateclub-584d7-firebase-adminsdk-5wrv6-ac5b7aaa7b.json');
 firebase_admin_1.default.initializeApp({
     credential: firebase_admin_1.default.credential.cert(serviceAccount)
 });

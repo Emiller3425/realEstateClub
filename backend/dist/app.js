@@ -1,29 +1,104 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const firebaseconfig_1 = require("./firebaseconfig");
-const app = (0, express_1.default)();
-const port = 5000;
-app.use(express_1.default.json());
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const firebaseconfig = require('./firebaseconfig');
+const cors = require('cors');
+
+const app = express();
+const port = process.env.PORT || 5001;
+
+// Enable CORS for the frontend origin
+app.use(cors({
+    origin: 'http://localhost:3000', // Allow your frontend origin
+}));
+
+// Middleware to parse JSON requests
+app.use(bodyParser.json());
+
+/**
+ * POST /webhook
+ * Fetch all documents from the 'announcements' collection in Firestore.
+ */
 app.post('/webhook', async (req, res) => {
     try {
-        // Example: Reading a specific document from Firestore
-        const docRef = firebaseconfig_1.db.collection('announcements').doc('Announcement1');
-        const doc = await docRef.get();
-        if (doc.exists) {
-            res.json(doc.data());
+        const announcementsRef = firebaseconfig.db.collection('announcements');
+        const snapshot = await announcementsRef.get();
+
+        if (snapshot.empty) {
+            res.status(404).json({ error: 'No announcements found' });
+            return;
         }
-        else {
-            res.status(404).json({ error: 'Document not found' });
-        }
-    }
-    catch (error) {
-        res.status(500).json({ error: "500 error" });
+
+        const announcements = [];
+        snapshot.forEach(doc => {
+            announcements.push({ id: doc.id, ...doc.data() });
+        });
+
+        res.json(announcements);
+    } catch (error) {
+        console.error('Error fetching announcements:', error);
+        res.status(500).json({ error: "Internal Error" });
     }
 });
-app.listen(port, () => {
+
+/**
+ * POST /new-announcement
+ * Add a new announcement to the 'announcements' collection in Firestore.
+ */
+app.post('/new-announcement', async (req, res) => {
+    try {
+        const { title, content } = req.body;
+        if (!title || !content) {
+            res.status(400).json({ error: 'Title and content are required' });
+            return;
+        }
+
+        const newAnnouncementRef = firebaseconfig.db.collection('announcements').doc();
+        const currentDate = new Date();
+        const formattedTimestamp = currentDate.toLocaleString('en-US', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false // Use 24-hour format
+        });
+        
+        await newAnnouncementRef.set({
+            title,
+            content,
+            timestamp: formattedTimestamp,
+        });
+
+        res.status(201).json({ message: 'Announcement added successfully' });
+    } catch (error) {
+        console.error('Error adding announcement:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+// Start the server
+const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
+// Graceful shutdown
+const shutdown = () => {
+    console.log('Shutting down server...');
+    server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+    });
+
+    // Force shutdown after 10 seconds
+    setTimeout(() => {
+        console.error('Forcing shutdown');
+        process.exit(1);
+    }, 10000);
+};
+
+// Handle termination signals
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/static/css/main.f948c27a.css",
+    "main.js": "/static/js/main.b95583d6.js",
+    "static/js/453.e5407da2.chunk.js": "/static/js/453.e5407da2.chunk.js",
+    "static/media/realEstateLogo.png": "/static/media/realEstateLogo.a6dc1be08791378648a7.png",
+    "index.html": "/index.html",
+    "main.f948c27a.css.map": "/static/css/main.f948c27a.css.map",
+    "main.b95583d6.js.map": "/static/js/main.b95583d6.js.map",
+    "453.e5407da2.chunk.js.map": "/static/js/453.e5407da2.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f948c27a.css",
+    "static/js/main.b95583d6.js"
+  ]
+}

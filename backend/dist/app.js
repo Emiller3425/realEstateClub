@@ -20,7 +20,7 @@ app.use(bodyParser.json());
  * POST /webhook
  * Fetch all documents from the 'announcements' collection in Firestore.
  */
-app.post('/webhook', async (req, res) => {
+app.post('/announcements', async (req, res) => {
     try {
         const announcementsRef = firebaseconfig.db.collection('announcements');
         const snapshot = await announcementsRef.get();
@@ -56,16 +56,21 @@ app.post('/new-announcement', async (req, res) => {
 
         const newAnnouncementRef = firebaseconfig.db.collection('announcements').doc();
         const currentDate = new Date();
-        const formattedTimestamp = currentDate.toLocaleString('en-US', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false // Use 24-hour format
+        const formattedDate = currentDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
         });
-        
+
+        const formattedTime = currentDate.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true, // Use 12-hour format with AM/PM
+        });
+
+        const formattedTimestamp = `${formattedDate} ${formattedTime}`;
+
         await newAnnouncementRef.set({
             title,
             content,
@@ -76,6 +81,118 @@ app.post('/new-announcement', async (req, res) => {
     } catch (error) {
         console.error('Error adding announcement:', error);
         res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+/**
+ * DELETE /delete-announcement/:id
+ * Delete an announcement from the 'announcements' collection in Firestore.
+ */
+app.delete('/delete-announcement/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const announcementRef = firebaseconfig.db.collection('announcements').doc(id);
+        await announcementRef.delete();
+
+        // Fetch updated list of announcements
+        const announcementsRef = firebaseconfig.db.collection('announcements');
+        const snapshot = await announcementsRef.get();
+
+        const announcements = [];
+        snapshot.forEach(doc => {
+            announcements.push({ id: doc.id, ...doc.data() });
+        });
+
+        res.json(announcements);
+    } catch (error) {
+        console.error('Error deleting announcement:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+/**
+ * POST /get-admin-password
+ * Fetch the admin password from the 'userProfile' collection in Firestore.
+ */
+app.post('/get-admin-password', async (req, res) => {
+    try {
+        const userProfileRef = firebaseconfig.db.collection('userProfile').doc('adminAccount');
+        const doc = await userProfileRef.get();
+
+        if (!doc.exists) {
+            res.status(404).json({ error: 'Admin account not found' });
+            return;
+        }
+
+        const data = doc.data();
+        res.json({ password: data.password });
+    } catch (error) {
+        console.error('Error fetching admin password:', error);
+        res.status(500).json({ error: 'Internal Error' });
+    }
+});
+
+/**
+ * GET /home-content
+ * Fetch the home content from the 'home' collection in Firestore.
+ */
+app.get('/home-content', async (req, res) => {
+    try {
+        const homeContentRef = firebaseconfig.db.collection('home').doc('homeContent');
+        const ourMissionRef = firebaseconfig.db.collection('home').doc('ourMission');
+
+        const [homeContentDoc, ourMissionDoc] = await Promise.all([homeContentRef.get(), ourMissionRef.get()]);
+
+        if (!homeContentDoc.exists || !ourMissionDoc.exists) {
+            res.status(404).json({ error: 'Home content not found' });
+            return;
+        }
+
+        const homeContent = homeContentDoc.data();
+        const ourMission = ourMissionDoc.data();
+
+        res.json({
+            welcomeMessage: homeContent.welcomeMessage,
+            nextMeeting: {
+                title: homeContent.title,
+                content: homeContent.content
+            },
+            mission: {
+                title: ourMission.title,
+                content: ourMission.content
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching home content:', error);
+        res.status(500).json({ error: 'Internal Error' });
+    }
+});
+
+/**
+ * POST /update-home-content
+ * Update the home content in the 'home' collection in Firestore.
+ */
+app.post('/update-home-content', async (req, res) => {
+    try {
+        const { welcomeMessage, nextMeeting, mission } = req.body;
+
+        const homeContentRef = firebaseconfig.db.collection('home').doc('homeContent');
+        const ourMissionRef = firebaseconfig.db.collection('home').doc('ourMission');
+
+        await homeContentRef.set({
+            title: nextMeeting.title,
+            content: nextMeeting.content
+        }, { merge: true });
+
+        await ourMissionRef.set({
+            title: mission.title,
+            content: mission.content
+        }, { merge: true });
+
+        res.status(200).json({ message: 'Home content updated successfully' });
+    } catch (error) {
+        console.error('Error updating home content:', error);
+        res.status(500).json({ error: 'Internal Error' });
     }
 });
 

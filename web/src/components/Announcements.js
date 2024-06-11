@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Editor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js';
 import 'draft-js/dist/Draft.css';
 
@@ -18,18 +18,41 @@ const FONT_SIZES = [
 
 const initialEditorState = EditorState.createEmpty();
 
-export default function Announcements() {
+const Announcement = ({ announcement, adminAccess, deleteAnnouncement }) => {
+  return (
+    <div
+      className="mb-4"
+      style={{ borderBottom: '1px solid #ccc', paddingBottom: '10px', marginBottom: '10px' }}
+    >
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">{announcement.title}</h1>
+        <small className="text-gray-500">{announcement.timestamp}</small>
+        {adminAccess && (
+          <button
+            className="bg-red-500 text-white py-1 px-2 rounded"
+            onClick={() => deleteAnnouncement(announcement.id)}
+          >
+            Delete
+          </button>
+        )}
+      </div>
+      <p>{announcement.content}</p>
+    </div>
+  );
+};
+
+export default function Announcements({ adminAccess }) {
   const [editorState, setEditorState] = useState(initialEditorState);
   const [fontSize, setFontSize] = useState(FONT_SIZES[0].value);
   const [announcements, setAnnouncements] = useState([]);
   const [showEditor, setShowEditor] = useState(false);
-  const [title, setTitle] = useState(''); // State to store the title
+  const [title, setTitle] = useState('');
   const editorRef = useRef(null);
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const response = await fetch('http://localhost:5001/webhook', {
+        const response = await fetch('http://localhost:5001/announcements', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -123,29 +146,57 @@ export default function Announcements() {
     }
   };
 
+  const deleteAnnouncement = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5001/delete-announcement/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      // Remove the deleted announcement from the state
+      setAnnouncements((prevAnnouncements) => prevAnnouncements.filter((announcement) => announcement.id !== id));
+    } catch (error) {
+      console.error('Error deleting announcement:', error);
+    }
+  };
+
   return (
     <div className="p-4">
       <div className="mb-4">
-        <h2 className="text-lg font-bold">Announcements</h2>
         {announcements.length > 0 ? (
-          <ul>
-            {announcements.map((announcement, index) => (
-              <li key={index}>{JSON.stringify(announcement)}</li>
-            ))}
-          </ul>
+          <div style={{ width: '98vw'}}>
+            {announcements
+              .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+              .map((announcement, index) => (
+                <Announcement
+                  key={index}
+                  announcement={announcement}
+                  adminAccess={adminAccess}
+                  deleteAnnouncement={deleteAnnouncement}
+                />
+              ))}
+          </div>
         ) : (
           <p>No announcements found.</p>
         )}
       </div>
-      <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
-        onClick={() => setShowEditor(!showEditor)}
-      >
-        {showEditor ? 'Cancel' : 'New Announcement'}
-      </button>
+      {adminAccess && (
+        <button
+          className="bg-navy hover:transform hover:scale-110 text-white font-bold py-2 px-4 rounded mb-4"
+          onClick={() => setShowEditor(!showEditor)}
+        >
+          {showEditor ? 'Cancel' : 'New Announcement'}
+        </button>
+      )}
       {showEditor && (
         <>
-        <div className="mb-4">
+          <div className="mb-4">
             <input
               type="text"
               placeholder="Enter title"
@@ -159,7 +210,7 @@ export default function Announcements() {
               <button
                 key={style}
                 className={`${
-                  currentInlineStyle.has(style) ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-700'
+                  currentInlineStyle.has(style) ? 'bg-navy' : 'bg-navy hover:bg-blue-700'
                 } text-white font-bold py-2 px-4 rounded`}
                 onMouseDown={(e) => {
                   e.preventDefault(); // Prevent losing focus
@@ -170,7 +221,7 @@ export default function Announcements() {
               </button>
             ))}
             <select
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              className="bg-navy hover:bg-navy text-white font-bold py-2 px-4 rounded"
               value={fontSize}
               onChange={handleFontSizeChange}
             >
@@ -183,6 +234,7 @@ export default function Announcements() {
           </div>
           <div className="border border-gray-400 p-4 mt-4 h-64 overflow-y-auto">
             <Editor
+              placeholder="Enter announcement details"
               ref={editorRef}
               editorState={editorState}
               onChange={handleEditorChange}
@@ -190,9 +242,12 @@ export default function Announcements() {
               keyBindingFn={mapKeyToEditorCommand}
             />
           </div>
-          <button className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={handlePostAnnouncement}>
-    Post Announcement
-  </button>
+          <button
+            className="mt-4 bg-navy hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onClick={handlePostAnnouncement}
+          >
+            Post Announcement
+          </button>
         </>
       )}
     </div>

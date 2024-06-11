@@ -1,77 +1,93 @@
 @tailwind components;
 
 .ml-5 {
-  margin-left: 1.25rem
+  margin-left: 1.25rem;
 }
 
 .mr-4 {
-  margin-right: 1rem
+  margin-right: 1rem;
 }
 
 .mt-8 {
-  margin-top: 2rem
+  margin-top: 2rem;
 }
 
 .flex {
-  display: flex
+  display: flex;
 }
 
 .items-center {
-  align-items: center
+  align-items: center;
 }
 
 .justify-center {
-  justify-content: center
+  justify-content: center;
 }
 
 .justify-between {
-  justify-content: space-between
+  justify-content: space-between;
 }
 
 .rounded {
-  border-radius: 0.25rem
+  border-radius: 0.25rem;
 }
 
 .bg-blue-500 {
   --tw-bg-opacity: 1;
-  background-color: rgb(59 130 246 / var(--tw-bg-opacity))
+  background-color: rgb(59 130 246 / var(--tw-bg-opacity));
 }
 
 .bg-blue-900 {
   --tw-bg-opacity: 1;
-  background-color: rgb(30 58 138 / var(--tw-bg-opacity))
+  background-color: rgb(30 58 138 / var(--tw-bg-opacity));
 }
 
 .bg-gray-500 {
   --tw-bg-opacity: 1;
-  background-color: rgb(107 114 128 / var(--tw-bg-opacity))
+  background-color: rgb(107 114 128 / var(--tw-bg-opacity));
 }
 
 .px-4 {
   padding-left: 1rem;
-  padding-right: 1rem
+  padding-right: 1rem;
 }
 
 .py-2 {
   padding-top: 0.5rem;
-  padding-bottom: 0.5rem
+  padding-bottom: 0.5rem;
 }
 
 .text-3xl {
   font-size: 1.875rem;
-  line-height: 2.25rem
+  line-height: 2.25rem;
 }
 
 .font-bold {
-  font-weight: 700
+  font-weight: 700;
 }
 
 .text-white {
   --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity))
+  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
 .hover\:bg-blue-600:hover {
   --tw-bg-opacity: 1;
-  background-color: rgb(37 99 235 / var(--tw-bg-opacity))
+  background-color: rgb(37 99 235 / var(--tw-bg-opacity));
+}
+
+.bg-navy {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 75 128 / var(--tw-bg-opacity)); /* Navy color */
+}
+
+.bg-dark-gray {
+  --tw-bg-opacity: 1;
+  background-color: rgb(48 48 48 / var(--tw-bg-opacity)); /* Dark gray color */
+}
+
+/* Custom navy text color */
+.text-navy {
+  --tw-text-opacity: 1;
+  color: rgb(0 75 128 / var(--tw-text-opacity)); /* Navy color */
 }

@@ -1,27 +1,34 @@
-import React, { useState } from 'react';
-import eboard1 from '../images/Eboard1.jpeg';
-import eboard2 from '../images/Eboard2.jpg';
-import blake from '../images/Blake.jpeg';
-import jacob from '../images/Jacob.jpg';
-import sophie from '../images/Sophie.jpg';
-import caleb from '../images/Caleb.jpg';
-import bronson from '../images/Bronson.jpg';
-import jake from '../images/Jake.jpg';
-
-const members = [
-  { name: 'Blake Bess', image: blake, description: 'Description for Blake', title: 'President', email: 'bessb@mail.gvsu.edu' },
-  { name: 'Jacob Vandenberg', image: jacob, description: 'Description for Jacob', title: 'Vice President', email: 'vandenjd@mail.gvsu.edu' },
-  { name: 'Sophie Bulos', image: sophie, description: 'Description for Sophie', title: 'Treasurer', email: 'buloss@mail.gvsu.edu' },
-  { name: 'Caleb Ray', image: caleb, description: 'Description for Caleb', title: 'Secretary', email: 'raycal@mail.gvsu.edu' },
-  { name: 'Bronson Bess', image: bronson, description: 'Description for Bronson', title: 'Marketing Director', email: 'bessbr@mail.gvsu.edu' },
-  { name: 'Jake Giddings', image: jake, description: 'Description for Jake', title: 'Event Coordinator', email: 'giddingsj@mail.gvsu.edu' },
-  { name: 'Cam Raffler', image: jake, description: 'Description for cam raffler', title: 'idk', email: 'rafflerc@mail.gvsu.edu' },
-  { name: 'Collin Shirkey', image: jake, description: 'description for collin shirkey', title: 'Event Coordinator', email: 'shirkeyc@mail.gvsu.edu' },
-];
+import React, { useState, useEffect } from 'react';
 
 const About = ({ adminAccess }) => {
   const [editMode, setEditMode] = useState(false);
-  const [membersContent, setMembersContent] = useState(members);
+  const [membersContent, setMembersContent] = useState([]);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [newMember, setNewMember] = useState({
+    name: '',
+    title: '',
+    email: '',
+    description: '',
+    image: null,
+  });
+
+  useEffect(() => {
+    // Fetch members content from Firestore
+    const fetchMembersContent = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/about');
+        const data = await response.json();
+        setTitle(data.title);
+        setContent(data.content);
+        setMembersContent(data.members);
+      } catch (error) {
+        console.error('Error fetching members content:', error);
+      }
+    };
+
+    fetchMembersContent();
+  }, []);
 
   const handleChange = (index, field, value) => {
     const updatedMembers = [...membersContent];
@@ -29,10 +36,146 @@ const About = ({ adminAccess }) => {
     setMembersContent(updatedMembers);
   };
 
+  const handleNewMemberChange = (field, value) => {
+    setNewMember(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleNewMemberChange('image', file);
+    }
+  };
+
+  const handleMemberImageChange = (index, file) => {
+    const updatedMembers = [...membersContent];
+    updatedMembers[index].image = file;
+    setMembersContent(updatedMembers);
+  };
+
+  const addNewMember = async () => {
+    // Function to add new member
+    try {
+      const formData = new FormData();
+      formData.append('name', newMember.name);
+      formData.append('title', newMember.title);
+      formData.append('email', newMember.email);
+      formData.append('description', newMember.description);
+      formData.append('image', newMember.image);
+
+      const response = await fetch('http://localhost:5001/new-member', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      setMembersContent([...membersContent, data]);
+      setNewMember({
+        name: '',
+        title: '',
+        email: '',
+        description: '',
+        image: null,
+      });
+    } catch (error) {
+      console.error('Error adding new member:', error);
+    }
+  };
+
+  const deleteMember = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5001/delete-member/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      setMembersContent(membersContent.filter(member => member.id !== id));
+    } catch (error) {
+      console.error('Error deleting member:', error);
+    }
+  };
+
+  const updateMember = async (index) => {
+    const member = membersContent[index];
+    const formData = new FormData();
+    formData.append('id', member.id);
+    formData.append('name', member.name);
+    formData.append('title', member.title);
+    formData.append('email', member.email);
+    formData.append('description', member.description);
+
+    if (typeof member.image !== 'string') {
+      formData.append('image', member.image);
+    }
+
+    try {
+      const response = await fetch('http://localhost:5001/update-member', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      setEditMode(false);
+    } catch (error) {
+      console.error('Error updating member:', error);
+    }
+  };
+
+  const updateTitleAndContent = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/update-about-title', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title, content }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      setEditMode(false);
+    } catch (error) {
+      console.error('Error updating title and content:', error);
+    }
+  };
+
   return (
     <div style={{ padding: '60px', fontFamily: 'Arial, sans-serif', margin: '0 auto', width: '75%' }}>
-      <h1 className="text-4xl font-bold" style={{ textAlign: 'center' }}>About Us!</h1>
-      <section style={{ marginBottom: '20px', textAlign: 'left' }}></section>
+      {editMode ? (
+        <>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            style={{ marginBottom: '20px', fontSize: '2rem' }}
+          />
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows="4"
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            style={{ marginBottom: '20px' }}
+          />
+        </>
+      ) : (
+        <>
+          <h1 className="text-4xl font-bold" style={{ textAlign: 'center' }}>{title}</h1>
+          <p style={{ marginBottom: '20px', textAlign: 'left' }}>{content}</p>
+        </>
+      )}
       {membersContent.map((member, index) => (
         <div
           key={index}
@@ -46,7 +189,7 @@ const About = ({ adminAccess }) => {
           }}
         >
           <img 
-            src={member.image} 
+            src={typeof member.image === 'string' ? member.image : URL.createObjectURL(member.image)} 
             alt={member.name} 
             style={{ 
               width: '150px', 
@@ -93,6 +236,20 @@ const About = ({ adminAccess }) => {
                     className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
                   />
                 </div>
+                <div className="mb-4">
+                  <input
+                    type="file"
+                    onChange={(e) => handleMemberImageChange(index, e.target.files[0])}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <button
+                  onClick={() => updateMember(index)}
+                  className="bg-navy text-white py-2 px-4 rounded-lg"
+                  style={{ marginTop: '10px' }}
+                >
+                  Save
+                </button>
               </>
             ) : (
               <>
@@ -102,16 +259,91 @@ const About = ({ adminAccess }) => {
                 <p style={{ paddingTop: '20px' }}>{member.description}</p>
               </>
             )}
+            {adminAccess && !editMode && (
+              <button
+                onClick={() => deleteMember(member.id)}
+                className="bg-red-500 text-white py-2 px-4 rounded-lg"
+                style={{ marginTop: '10px' }}
+              >
+                Delete
+              </button>
+            )}
           </div>
         </div>
       ))}
       {adminAccess && (
-        <button
-          onClick={() => setEditMode(!editMode)}
-          className="bg-navy text-white py-2 px-4 rounded-lg"
-        >
-          {editMode ? 'Save' : 'Edit'}
-        </button>
+        <>
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className="bg-navy text-white py-2 px-4 rounded-lg"
+          >
+            {editMode ? 'Exit Edit Mode' : 'Edit'}
+          </button>
+          {editMode && (
+            <>
+              <div style={{ marginTop: '40px' }}>
+                <h2 className="text-3xl font-bold">Add New Member</h2>
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Name"
+                    value={newMember.name}
+                    onChange={(e) => handleNewMemberChange('name', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Title"
+                    value={newMember.title}
+                    onChange={(e) => handleNewMemberChange('title', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Email"
+                    value={newMember.email}
+                    onChange={(e) => handleNewMemberChange('email', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                    style={{ color: 'gray', fontStyle: 'italic' }}
+                  />
+                </div>
+                <div className="mb-4">
+                  <textarea
+                    placeholder="Description"
+                    value={newMember.description}
+                    onChange={(e) => handleNewMemberChange('description', e.target.value)}
+                    rows="4"
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div className="mb-4">
+                  <input
+                    type="file"
+                    onChange={handleImageChange}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <button
+                  onClick={addNewMember}
+                  className="bg-navy text-white py-2 px-4 rounded-lg"
+                >
+                  Add Member
+                </button>
+              </div>
+              <button
+                onClick={updateTitleAndContent}
+                className="bg-navy text-white py-2 px-4 rounded-lg"
+                style={{ marginTop: '20px' }}
+              >
+                Save Title and Content
+              </button>
+            </>
+          )}
+        </>
       )}
     </div>
   );

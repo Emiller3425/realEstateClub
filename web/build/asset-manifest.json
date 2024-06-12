@@ -1,16 +1,27 @@
 {
   "files": {
-    "main.css": "/static/css/main.e58bdfe7.css",
-    "main.js": "/static/js/main.97b28989.js",
+    "main.css": "/static/css/main.5692b965.css",
+    "main.js": "/static/js/main.a5ff5a1e.js",
     "static/js/453.e5407da2.chunk.js": "/static/js/453.e5407da2.chunk.js",
+    "static/media/Eboard2.jpg": "/static/media/Eboard2.73cde9a6880d682f0cf4.jpg",
+    "static/media/Bronson.jpg": "/static/media/Bronson.54c1e07782b3211cef4e.jpg",
+    "static/media/Sophie.jpg": "/static/media/Sophie.093b9a659662c1b386f8.jpg",
+    "static/media/Jacob.jpg": "/static/media/Jacob.ebb2d613ab3ec9b23415.jpg",
+    "static/media/Eboard1.jpeg": "/static/media/Eboard1.60f2b3ceab0b9310231b.jpeg",
+    "static/media/Caleb.jpg": "/static/media/Caleb.6292fd69b4adee92a703.jpg",
+    "static/media/Jake.jpg": "/static/media/Jake.8650ece00825cf7129b4.jpg",
+    "static/media/Blake.jpeg": "/static/media/Blake.3283bd880c3108a6bec7.jpeg",
     "static/media/realEstateLogo.png": "/static/media/realEstateLogo.a6dc1be08791378648a7.png",
+    "static/media/seidman.jpg": "/static/media/seidman.c6a1359a087569d52a96.jpg",
+    "static/media/linkedIn.png": "/static/media/linkedIn.09ca2b4249b5745f4c63.png",
+    "static/media/insta.webp": "/static/media/insta.e7211909abd971e81731.webp",
     "index.html": "/index.html",
-    "main.e58bdfe7.css.map": "/static/css/main.e58bdfe7.css.map",
-    "main.97b28989.js.map": "/static/js/main.97b28989.js.map",
+    "main.5692b965.css.map": "/static/css/main.5692b965.css.map",
+    "main.a5ff5a1e.js.map": "/static/js/main.a5ff5a1e.js.map",
     "453.e5407da2.chunk.js.map": "/static/js/453.e5407da2.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.e58bdfe7.css",
-    "static/js/main.97b28989.js"
+    "static/css/main.5692b965.css",
+    "static/js/main.a5ff5a1e.js"
   ]
 }

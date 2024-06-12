@@ -11,7 +11,7 @@ import Announcements from './components/Announcements';
 import Calendar from './components/Calendar';
 import About from './components/About';
 import Login from './components/Login';
-import History from './components/History';
+import Resources from './components/Resources';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -65,7 +65,7 @@ function App() {
             <Route path="/calendar" element={<Calendar adminAccess={adminAccess} />} />
             <Route path="/about" element={<About adminAccess={adminAccess} />} />
             <Route path="/login" element={<Login setLoggedIn={setLoggedIn} setAdminAccess={setAdminAccess} />} />
-            <Route path="/history" element={<History adminAccess={adminAccess} />} />
+            <Route path="/resources" element={<Resources adminAccess={adminAccess} />} />
           </Routes>
         </div>
 
@@ -101,7 +101,7 @@ function Tabs() {
       <Link to="/announcements" className={`w-full px-4 py-4 text-center ${getTabClass('/announcements')}`}>Announcements</Link>
       <Link to="/calendar" className={`w-full px-4 py-4 text-center ${getTabClass('/calendar')}`}>Calendar</Link>
       <Link to="/about" className={`w-full px-4 py-4 text-center ${getTabClass('/about')}`}>About</Link>
-      <Link to="/history" className={`w-full px-4 py-4 text-center ${getTabClass('/history')}`}>History</Link>
+      <Link to="/resources" className={`w-full px-4 py-4 text-center ${getTabClass('/resources')}`}>Resources</Link>
     </div>
   );
 }

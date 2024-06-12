@@ -10,11 +10,11 @@ const Home = ({ adminAccess }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track the current image index in the slideshow
   const [editMode, setEditMode] = useState(false); // State to track whether edit mode is enabled
   const [content, setContent] = useState({
-    welcomeMessage: 'Welcome to the GVSU Real Estate Club',
-    nextMeetingTitle: 'Next Meeting',
-    nextMeeting: 'Join us for our next meeting on June 15th, 2024 at 6:00 PM in the Seidman College of Business, Room 101.',
-    missionTitle: 'Our Mission',
-    mission: 'Welcome to the Real Estate Club, where we bring together enthusiasts, professionals, and students passionate about the dynamic world of real estate. Our mission is to provide valuable insights, networking opportunities, and educational resources to help our members navigate the real estate industry effectively. Whether you are interested in residential, commercial, or industrial real estate, our club offers a platform for growth and development. Join us for informative seminars, engaging discussions, and hands-on workshops designed to enhance your understanding and skills in the real estate market.',
+    welcomeMessage: '',
+    nextMeetingTitle: '',
+    nextMeeting: '',
+    missionTitle: '',
+    mission: '',
   });
 
   useEffect(() => {

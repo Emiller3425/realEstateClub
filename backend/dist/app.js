@@ -2,8 +2,9 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const firebaseconfig = require('./firebaseconfig');
+const { db, bucket } = require('./firebaseconfig');
 const cors = require('cors');
+const multer = require('multer');
 
 const app = express();
 const port = process.env.PORT || 5001;
@@ -16,13 +17,16 @@ app.use(cors({
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
 
+// Middleware to handle multipart/form-data
+const upload = multer({ storage: multer.memoryStorage() });
+
 /**
  * POST /webhook
  * Fetch all documents from the 'announcements' collection in Firestore.
  */
 app.post('/announcements', async (req, res) => {
     try {
-        const announcementsRef = firebaseconfig.db.collection('announcements');
+        const announcementsRef = db.collection('announcements');
         const snapshot = await announcementsRef.get();
 
         if (snapshot.empty) {
@@ -54,7 +58,7 @@ app.post('/new-announcement', async (req, res) => {
             return;
         }
 
-        const newAnnouncementRef = firebaseconfig.db.collection('announcements').doc();
+        const newAnnouncementRef = db.collection('announcements').doc();
         const currentDate = new Date();
         const formattedDate = currentDate.toLocaleDateString('en-US', {
             year: 'numeric',
@@ -91,11 +95,11 @@ app.post('/new-announcement', async (req, res) => {
 app.delete('/delete-announcement/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const announcementRef = firebaseconfig.db.collection('announcements').doc(id);
+        const announcementRef = db.collection('announcements').doc(id);
         await announcementRef.delete();
 
         // Fetch updated list of announcements
-        const announcementsRef = firebaseconfig.db.collection('announcements');
+        const announcementsRef = db.collection('announcements');
         const snapshot = await announcementsRef.get();
 
         const announcements = [];
@@ -116,7 +120,7 @@ app.delete('/delete-announcement/:id', async (req, res) => {
  */
 app.post('/get-admin-password', async (req, res) => {
     try {
-        const userProfileRef = firebaseconfig.db.collection('userProfile').doc('adminAccount');
+        const userProfileRef = db.collection('userProfile').doc('adminAccount');
         const doc = await userProfileRef.get();
 
         if (!doc.exists) {
@@ -138,8 +142,8 @@ app.post('/get-admin-password', async (req, res) => {
  */
 app.get('/home-content', async (req, res) => {
     try {
-        const homeContentRef = firebaseconfig.db.collection('home').doc('homeContent');
-        const ourMissionRef = firebaseconfig.db.collection('home').doc('ourMission');
+        const homeContentRef = db.collection('home').doc('homeContent');
+        const ourMissionRef = db.collection('home').doc('ourMission');
 
         const [homeContentDoc, ourMissionDoc] = await Promise.all([homeContentRef.get(), ourMissionRef.get()]);
 
@@ -176,10 +180,11 @@ app.post('/update-home-content', async (req, res) => {
     try {
         const { welcomeMessage, nextMeeting, mission } = req.body;
 
-        const homeContentRef = firebaseconfig.db.collection('home').doc('homeContent');
-        const ourMissionRef = firebaseconfig.db.collection('home').doc('ourMission');
+        const homeContentRef = db.collection('home').doc('homeContent');
+        const ourMissionRef = db.collection('home').doc('ourMission');
 
         await homeContentRef.set({
+            welcomeMessage, // Ensure welcomeMessage is being saved correctly
             title: nextMeeting.title,
             content: nextMeeting.content
         }, { merge: true });
@@ -193,6 +198,208 @@ app.post('/update-home-content', async (req, res) => {
     } catch (error) {
         console.error('Error updating home content:', error);
         res.status(500).json({ error: 'Internal Error' });
+    }
+});
+
+/**
+ * GET /about
+ * Fetch all documents from the 'about' collection in Firestore.
+ */
+app.get('/about', async (req, res) => {
+    try {
+        const aboutRef = db.collection('about');
+        const snapshot = await aboutRef.get();
+
+        if (snapshot.empty) {
+            res.status(404).json({ error: 'No about content found' });
+            return;
+        }
+
+        const aboutContent = [];
+        let title = '';
+        let content = '';
+
+        snapshot.forEach(doc => {
+            if (doc.id === 'aboutTitle') {
+                title = doc.data().title;
+                content = doc.data().content;
+            } else {
+                aboutContent.push({ id: doc.id, ...doc.data() });
+            }
+        });
+
+        res.json({ title, content, members: aboutContent });
+    } catch (error) {
+        console.error('Error fetching about content:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+/**
+ * POST /update-about-title
+ * Update the about title and content in Firestore.
+ */
+app.post('/update-about-title', async (req, res) => {
+    try {
+        const { title, content } = req.body;
+        const aboutTitleRef = db.collection('about').doc('aboutTitle');
+
+        await aboutTitleRef.set({ title, content }, { merge: true });
+
+        res.status(200).json({ message: 'About title updated successfully' });
+    } catch (error) {
+        console.error('Error updating about title:', error);
+        res.status(500).json({ error: 'Internal Error' });
+    }
+});
+
+
+/**
+ * POST /new-member
+ * Add a new member profile to Firestore.
+ */
+app.post('/new-member', upload.single('image'), async (req, res) => {
+    try {
+        const { name, title, email, description } = req.body;
+        const file = req.file;
+
+        if (!name || !title || !email || !description || !file) {
+            res.status(400).json({ error: 'All fields are required' });
+            return;
+        }
+
+        // Upload image to Firebase Storage
+        const blob = bucket.file(`profiles/${file.originalname}`);
+        const blobStream = blob.createWriteStream({
+            metadata: {
+                contentType: file.mimetype
+            }
+        });
+
+        blobStream.on('error', (err) => {
+            console.error('Error uploading file:', err);
+            res.status(500).json({ error: "Internal Error" });
+        });
+
+        blobStream.on('finish', async () => {
+            const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+            // Make the file publicly accessible
+            await blob.makePublic();
+
+            // Save the member profile to Firestore
+            const newMemberRef = db.collection('about').doc();
+            await newMemberRef.set({
+                name,
+                title,
+                email,
+                description,
+                image: imageUrl,
+            });
+
+            const newMember = {
+                id: newMemberRef.id,
+                name,
+                title,
+                email,
+                description,
+                image: imageUrl,
+            };
+
+            res.status(201).json(newMember);
+        });
+
+        blobStream.end(file.buffer);
+    } catch (error) {
+        console.error('Error adding new member:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+/**
+ * DELETE /delete-member/:id
+ * Delete a member profile from Firestore and its associated image from Firebase Storage.
+ */
+app.delete('/delete-member/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const memberRef = db.collection('about').doc(id);
+        const memberDoc = await memberRef.get();
+
+        if (!memberDoc.exists) {
+            res.status(404).json({ error: 'Member not found' });
+            return;
+        }
+
+        const memberData = memberDoc.data();
+        const imageUrl = memberData.image;
+        const fileName = imageUrl.split('/').pop().split('?')[0]; // Extract file name from URL
+
+        // Delete the Firestore document
+        await memberRef.delete();
+
+        // Delete the associated image from Firebase Storage
+        const file = bucket.file(`profiles/${fileName}`);
+        await file.delete();
+
+        res.status(200).json({ message: 'Member deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting member:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+/**
+ * POST /update-member
+ * Update a member profile in Firestore.
+ */
+app.post('/update-member', upload.single('image'), async (req, res) => {
+    try {
+        const { id, name, title, email, description } = req.body;
+        const file = req.file;
+
+        if (!id || !name || !title || !email || !description) {
+            res.status(400).json({ error: 'All fields are required' });
+            return;
+        }
+
+        const memberRef = db.collection('about').doc(id);
+        const memberData = { name, title, email, description };
+
+        if (file) {
+            // Upload new image to Firebase Storage
+            const blob = bucket.file(`profiles/${file.originalname}`);
+            const blobStream = blob.createWriteStream({
+                metadata: {
+                    contentType: file.mimetype
+                }
+            });
+
+            blobStream.on('error', (err) => {
+                console.error('Error uploading file:', err);
+                res.status(500).json({ error: "Internal Error" });
+            });
+
+            blobStream.on('finish', async () => {
+                const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+                // Make the file publicly accessible
+                await blob.makePublic();
+
+                memberData.image = imageUrl;
+                await memberRef.update(memberData);
+
+                res.status(200).json({ message: 'Member updated successfully' });
+            });
+
+            blobStream.end(file.buffer);
+        } else {
+            await memberRef.update(memberData);
+            res.status(200).json({ message: 'Member updated successfully' });
+        }
+    } catch (error) {
+        console.error('Error updating member:', error);
+        res.status(500).json({ error: "Internal Error" });
     }
 });
 

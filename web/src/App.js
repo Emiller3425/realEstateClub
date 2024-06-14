@@ -25,7 +25,8 @@ function App() {
 
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
+      <div 
+      style={{ fontFamily: 'Gill Sans, sans-serif' }} className="flex flex-col min-h-screen">
         {/* Banner with Logo and Login button */}
         <div className="header-container bg-dark-gray text-white py-4 flex justify-between items-center">
           <div className="flex items-center">

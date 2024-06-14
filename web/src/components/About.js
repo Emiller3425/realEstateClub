@@ -11,17 +11,17 @@ const About = ({ adminAccess }) => {
     email: '',
     description: '',
     image: null,
+    order: 0,
   });
 
   useEffect(() => {
-    // Fetch members content from Firestore
     const fetchMembersContent = async () => {
       try {
         const response = await fetch('http://localhost:5001/about');
         const data = await response.json();
         setTitle(data.title);
         setContent(data.content);
-        setMembersContent(data.members);
+        setMembersContent(data.members.sort((a, b) => a.order - b.order));
       } catch (error) {
         console.error('Error fetching members content:', error);
       }
@@ -37,7 +37,7 @@ const About = ({ adminAccess }) => {
   };
 
   const handleNewMemberChange = (field, value) => {
-    setNewMember(prev => ({ ...prev, [field]: value }));
+    setNewMember((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleImageChange = (e) => {
@@ -54,7 +54,6 @@ const About = ({ adminAccess }) => {
   };
 
   const addNewMember = async () => {
-    // Function to add new member
     try {
       const formData = new FormData();
       formData.append('name', newMember.name);
@@ -62,6 +61,7 @@ const About = ({ adminAccess }) => {
       formData.append('email', newMember.email);
       formData.append('description', newMember.description);
       formData.append('image', newMember.image);
+      formData.append('order', membersContent.length);
 
       const response = await fetch('http://localhost:5001/new-member', {
         method: 'POST',
@@ -80,6 +80,7 @@ const About = ({ adminAccess }) => {
         email: '',
         description: '',
         image: null,
+        order: 0,
       });
     } catch (error) {
       console.error('Error adding new member:', error);
@@ -96,7 +97,7 @@ const About = ({ adminAccess }) => {
         throw new Error('Network response was not ok');
       }
 
-      setMembersContent(membersContent.filter(member => member.id !== id));
+      setMembersContent(membersContent.filter((member) => member.id !== id));
     } catch (error) {
       console.error('Error deleting member:', error);
     }
@@ -110,6 +111,7 @@ const About = ({ adminAccess }) => {
     formData.append('title', member.title);
     formData.append('email', member.email);
     formData.append('description', member.description);
+    formData.append('order', member.order);
 
     if (typeof member.image !== 'string') {
       formData.append('image', member.image);
@@ -149,6 +151,25 @@ const About = ({ adminAccess }) => {
     } catch (error) {
       console.error('Error updating title and content:', error);
     }
+  };
+
+  const moveMember = async (index, direction) => {
+    const updatedMembers = [...membersContent];
+    const swapIndex = index + direction;
+
+    if (swapIndex < 0 || swapIndex >= updatedMembers.length) return;
+
+    [updatedMembers[index], updatedMembers[swapIndex]] = [updatedMembers[swapIndex], updatedMembers[index]];
+
+    updatedMembers[index].order -= direction;
+    updatedMembers[swapIndex].order += direction;
+    console.log(updatedMembers);
+
+
+    setMembersContent(updatedMembers);
+
+    await updateMember(index);
+    await updateMember(swapIndex);
   };
 
   return (
@@ -267,6 +288,23 @@ const About = ({ adminAccess }) => {
               >
                 Delete
               </button>
+            )}
+            {editMode && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+                <button
+                  onClick={() => moveMember(index, -1)}
+                  className="bg-blue-500 text-white py-2 px-4 rounded-lg"
+                  style={{ marginRight: '10px' }}
+                >
+                  Move Up
+                </button>
+                <button
+                  onClick={() => moveMember(index, 1)}
+                  className="bg-blue-500 text-white py-2 px-4 rounded-lg"
+                >
+                  Move Down
+                </button>
+              </div>
             )}
           </div>
         </div>

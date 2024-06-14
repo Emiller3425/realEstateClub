@@ -228,6 +228,9 @@ app.get('/about', async (req, res) => {
             }
         });
 
+        // Sort members by order field
+        aboutContent.sort((a, b) => a.order - b.order);
+
         res.json({ title, content, members: aboutContent });
     } catch (error) {
         console.error('Error fetching about content:', error);
@@ -260,7 +263,7 @@ app.post('/update-about-title', async (req, res) => {
  */
 app.post('/new-member', upload.single('image'), async (req, res) => {
     try {
-        const { name, title, email, description } = req.body;
+        const { name, title, email, description, order } = req.body;
         const file = req.file;
 
         if (!name || !title || !email || !description || !file) {
@@ -295,6 +298,7 @@ app.post('/new-member', upload.single('image'), async (req, res) => {
                 email,
                 description,
                 image: imageUrl,
+                order: parseInt(order, 10) // Ensure order is saved as a number
             });
 
             const newMember = {
@@ -304,6 +308,7 @@ app.post('/new-member', upload.single('image'), async (req, res) => {
                 email,
                 description,
                 image: imageUrl,
+                order: parseInt(order, 10)
             };
 
             res.status(201).json(newMember);
@@ -355,16 +360,16 @@ app.delete('/delete-member/:id', async (req, res) => {
  */
 app.post('/update-member', upload.single('image'), async (req, res) => {
     try {
-        const { id, name, title, email, description } = req.body;
+        const { id, name, title, email, description, order } = req.body;
         const file = req.file;
 
-        if (!id || !name || !title || !email || !description) {
+        if (!id || !name || !title || !email || !description || order === undefined) {
             res.status(400).json({ error: 'All fields are required' });
             return;
         }
 
         const memberRef = db.collection('about').doc(id);
-        const memberData = { name, title, email, description };
+        const memberData = { name, title, email, description, order: parseInt(order, 10) };
 
         if (file) {
             // Upload new image to Firebase Storage

@@ -21,8 +21,8 @@ const initialEditorState = EditorState.createEmpty();
 const Announcement = ({ announcement, adminAccess, deleteAnnouncement }) => {
   return (
     <div
-      className="mb-4"
-      style={{ borderBottom: '1px solid #ccc', paddingBottom: '10px', marginBottom: '10px' }}
+      className="mb-4 p-4"
+      style={{ borderBottom: '1px solid #ccc', paddingBottom: '10px', marginBottom: '10px', fontFamily: "Gill Sans, sans-serif" }}
     >
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">{announcement.title}</h1>
@@ -170,7 +170,7 @@ export default function Announcements({ adminAccess }) {
     <div className="p-4">
       <div className="mb-4">
         {announcements.length > 0 ? (
-          <div style={{ width: '98vw'}}>
+          <div style={{ width: '98vw' }}>
             {announcements
               .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
               .map((announcement, index) => (

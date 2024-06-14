@@ -1,10 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import seidman from '../images/seidman.jpg';
-import eboard1 from '../images/Eboard1.jpeg';
-import eboard2 from '../images/Eboard2.jpg';
+import eboard1 from '../images/eboard1.jpeg';
+import event1 from '../images/event1.jpg';
+import event3 from '../images/event3.jpg';
+import event4 from '../images/event4.jpg';
+import event5 from '../images/event5.jpg';
+import event6 from '../images/event6.jpg';
+import event7 from '../images/event7.jpeg';
+import event8 from '../images/event8.jpeg';
+import devTour from '../images/devTour.jpg';
+import victory from '../images/victory.jpg';
+import devTour2 from '../images/devTour2.jpg';
+import devTourFunny from '../images/devTourFunny.jpg';
+import gr from '../images/GR.jpg.webp';
 
-// Array of images for the slideshow
-const images = [seidman, eboard1, eboard2];
+// Function to shuffle the array
+const shuffle = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
 
 const Home = ({ adminAccess }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track the current image index in the slideshow
@@ -16,6 +33,7 @@ const Home = ({ adminAccess }) => {
     missionTitle: '',
     mission: '',
   });
+  const [shuffledImages, setShuffledImages] = useState([]);
 
   useEffect(() => {
     // Fetch content from the server when the component mounts
@@ -36,6 +54,10 @@ const Home = ({ adminAccess }) => {
     };
 
     fetchData();
+
+    // Shuffle the images array and set it to state
+    const images = [seidman, eboard1, victory, devTour, event1, event3, event4, event5, event6, event7, event8, devTour2, devTourFunny, gr];
+    setShuffledImages(shuffle([...images]));
 
     // Set an interval to change the image in the slideshow every 4 seconds
     const interval = setInterval(() => {
@@ -79,7 +101,7 @@ const Home = ({ adminAccess }) => {
 
   return (
     <div style={{ 
-      fontFamily: 'Arial, sans-serif', 
+      fontFamily: 'Gill Sans, sans-serif', 
       textAlign: 'center', 
       margin: '0 auto' 
     }}>
@@ -96,7 +118,7 @@ const Home = ({ adminAccess }) => {
         }}
       >
         {/* Slideshow images */}
-        {images.map((image, index) => (
+        {shuffledImages.map((image, index) => (
           <img 
             key={index}
             src={image} 
@@ -142,7 +164,7 @@ const Home = ({ adminAccess }) => {
         )}
       </div>
       
-      <div style={{ margin: '40px 0', padding: '20px' }}>
+      <div className="bg-dark-gray text-white py-20">
         {/* Next Meeting section */}
         {editMode ? (
           <input
@@ -150,7 +172,7 @@ const Home = ({ adminAccess }) => {
             name="nextMeetingTitle"
             value={content.nextMeetingTitle}
             onChange={handleChange}
-            className="text-4xl font-bold w-full p-2 mb-4"
+            className="text-4xl font-bold text-black w-full p-2 mb-4"
             style={{ border: '1px solid #ccc', borderRadius: '4px'}}
           />
         ) : (
@@ -161,7 +183,7 @@ const Home = ({ adminAccess }) => {
             name="nextMeeting"
             value={content.nextMeeting}
             onChange={handleChange}
-            className="w-full p-2"
+            className="w-full p-2 text-black"
             rows="4"
             style={{ border: '1px solid #ccc', borderRadius: '4px', width: '60%', margin: '0 auto', textAlign: 'left'}}
           />

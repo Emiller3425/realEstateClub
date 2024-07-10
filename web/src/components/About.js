@@ -173,7 +173,7 @@ const About = ({ adminAccess }) => {
   };
 
   return (
-    <div style={{ padding: '60px', fontFamily: 'Arial, sans-serif', margin: '0 auto', width: '75%' }}>
+    <div style={{ padding: '40px',fontFamily: 'Gill Sans, sans-serif', margin: '0 auto', width: '75%' }}>
       {editMode ? (
         <>
           <input
@@ -181,7 +181,7 @@ const About = ({ adminAccess }) => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-            style={{ marginBottom: '20px', fontSize: '2rem' }}
+            style={{ marginBottom: '20px', fontSize: '2rem'}}
           />
           <textarea
             value={content}
@@ -193,8 +193,8 @@ const About = ({ adminAccess }) => {
         </>
       ) : (
         <>
-          <h1 className="text-4xl font-bold" style={{ textAlign: 'center' }}>{title}</h1>
-          <p style={{ marginBottom: '20px', textAlign: 'left' }}>{content}</p>
+          <h1 className="text-4xl font-bold" style={{ textAlign: 'center', padding:'30px' }}>{title}</h1>
+          <p className="text-2xl"style={{ marginBottom: '20px', textAlign: 'left' }}>{content}</p>
         </>
       )}
       {membersContent.map((member, index) => (

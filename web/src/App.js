@@ -6,6 +6,7 @@ import './output.css';
 import realEstateLogo from './images/realEstateLogo.png'; // Importing the logo image
 import linkedIn from './images/linkedIn.png'; // Importing the logo image
 import insta from './images/insta.webp'; // Importing the logo image
+import tiktok from './images/tiktok.png'; // Importing the logo image
 import Home from './components/Home';
 import Announcements from './components/Announcements';
 import Calendar from './components/Calendar';
@@ -81,6 +82,9 @@ function App() {
             </a>
             <a href="https://www.linkedin.com/company/real-estate-club-at-gvsu" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>
               <img src={linkedIn} alt="LinkedIn Logo" className="h-20 hover:transform hover:scale-110" />
+            </a>
+            <a href="https://www.tiktok.com/@gvsurealestateclub?lang=en" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>
+              <img src={tiktok} alt="TikTok Logo" className="h-20 hover:transform hover:scale-110" />
             </a>
           </div>
         </footer>

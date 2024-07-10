@@ -28,7 +28,7 @@ const Calendar = () => {
       )}
       <iframe
         ref={iframeRef}
-        src="https://calendar.google.com/calendar/embed?src=emiller3425%40gmail.com&ctz=America%2FDetroit"
+        src="https://calendar.google.com/calendar/embed?src=gvsurealestateclub%40gmail.com&ctz=America%2FDetroit"
         style={{
           width: '100vw',
           height: '100vh',

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import seidman from '../images/seidman.jpg';
-import eboard1 from '../images/eboard1.jpeg';
 import event1 from '../images/event1.jpg';
 import event3 from '../images/event3.jpg';
 import event4 from '../images/event4.jpg';
@@ -9,7 +8,7 @@ import event6 from '../images/event6.jpg';
 import event7 from '../images/event7.jpeg';
 import event8 from '../images/event8.jpeg';
 import devTour from '../images/devTour.jpg';
-import victory from '../images/victory.jpg';
+import victory from '../images/victory.jpeg';
 import devTour2 from '../images/devTour2.jpg';
 import devTourFunny from '../images/devTourFunny.jpg';
 import gr from '../images/GR.jpg.webp';
@@ -56,7 +55,7 @@ const Home = ({ adminAccess }) => {
     fetchData();
 
     // Shuffle the images array and set it to state
-    const images = [seidman, eboard1, victory, devTour, event1, event3, event4, event5, event6, event7, event8, devTour2, devTourFunny, gr];
+    const images = [seidman, victory, devTour, event1, event3, event4, event5, event6, event7, event8, devTour2, devTourFunny, gr];
     setShuffledImages(shuffle([...images]));
 
     // Set an interval to change the image in the slideshow every 4 seconds
@@ -183,12 +182,12 @@ const Home = ({ adminAccess }) => {
             name="nextMeeting"
             value={content.nextMeeting}
             onChange={handleChange}
-            className="w-full p-2 text-black"
+            className="w-full p-2 text-black text-2xl"
             rows="4"
             style={{ border: '1px solid #ccc', borderRadius: '4px', width: '60%', margin: '0 auto', textAlign: 'left'}}
           />
         ) : (
-          <p style={{ width: '60%', margin: '0 auto', textAlign: 'left' }}>{content.nextMeeting}</p>
+          <p className="text-2xl" style={{ width: '60%', margin: '0 auto', textAlign: 'left' }}>{content.nextMeeting}</p>
         )}
       </div>
       
@@ -216,7 +215,7 @@ const Home = ({ adminAccess }) => {
             style={{ border: '1px solid #ccc', borderRadius: '4px', width: '60%', margin: '0 auto', textAlign: 'left'}}
           />
         ) : (
-          <p style={{ width: '60%', margin: '0 auto', textAlign: 'left' }}>{content.mission}</p>
+          <p className="text-2xl" style={{ width: '60%', margin: '0 auto', textAlign: 'left' }}>{content.mission}</p>
         )}
       </section>
       

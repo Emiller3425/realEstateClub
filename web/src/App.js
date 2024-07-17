@@ -15,14 +15,7 @@ import Login from './components/Login';
 import Resources from './components/Resources';
 
 function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
   const [adminAccess, setAdminAccess] = useState(false);
-
-  const handleLogout = () => {
-    // Handle logout functionality here
-    setLoggedIn(false);
-    setAdminAccess(false);
-  };
 
   return (
     <Router>
@@ -66,7 +59,7 @@ function App() {
             <Route path="/announcements" element={<Announcements adminAccess={adminAccess} />} />
             <Route path="/calendar" element={<Calendar adminAccess={adminAccess} />} />
             <Route path="/about" element={<About adminAccess={adminAccess} />} />
-            <Route path="/login" element={<Login setLoggedIn={setLoggedIn} setAdminAccess={setAdminAccess} />} />
+            <Route path="/login" element={<Login setAdminAccess={setAdminAccess} />} />
             <Route path="/resources" element={<Resources adminAccess={adminAccess} />} />
           </Routes>
         </div>

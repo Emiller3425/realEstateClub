@@ -11,7 +11,8 @@ const port = process.env.PORT || 5001;
 
 // Enable CORS for the frontend origin
 app.use(cors({
-    origin: 'http://localhost:3000', // Allow your frontend origin
+   // origin: 'http://localhost:3000', // Allow your frontend origin
+   origin: 'https://real-estate-club-scqb.vercel.app',
 }));
 
 // Middleware to parse JSON requests

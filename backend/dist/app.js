@@ -26,7 +26,7 @@ const upload = multer({ storage: multer.memoryStorage() });
  * POST /api/announcements
  * Fetch all documents from the 'announcements' collection in Firestore.
  */
-app.post('/api/announcements', async (req, res) => {
+app.post('/api/sannouncements', async (req, res) => {
     try {
         const announcementsRef = db.collection('announcements');
         const snapshot = await announcementsRef.get();

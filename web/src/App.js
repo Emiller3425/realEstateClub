@@ -34,7 +34,6 @@ function App() {
             {adminAccess ? (
               <button
                 className="bg-white text-navy py-2 px-4 rounded-lg btn"
-                onClick={handleLogout}
               >
                 Logout
               </button>

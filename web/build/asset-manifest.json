@@ -1,27 +1,31 @@
 {
   "files": {
-    "main.css": "/static/css/main.5692b965.css",
-    "main.js": "/static/js/main.a5ff5a1e.js",
+    "main.css": "/static/css/main.65d9a1be.css",
+    "main.js": "/static/js/main.9e164edc.js",
     "static/js/453.e5407da2.chunk.js": "/static/js/453.e5407da2.chunk.js",
-    "static/media/Eboard2.jpg": "/static/media/Eboard2.73cde9a6880d682f0cf4.jpg",
-    "static/media/Bronson.jpg": "/static/media/Bronson.54c1e07782b3211cef4e.jpg",
-    "static/media/Sophie.jpg": "/static/media/Sophie.093b9a659662c1b386f8.jpg",
-    "static/media/Jacob.jpg": "/static/media/Jacob.ebb2d613ab3ec9b23415.jpg",
-    "static/media/Eboard1.jpeg": "/static/media/Eboard1.60f2b3ceab0b9310231b.jpeg",
-    "static/media/Caleb.jpg": "/static/media/Caleb.6292fd69b4adee92a703.jpg",
-    "static/media/Jake.jpg": "/static/media/Jake.8650ece00825cf7129b4.jpg",
-    "static/media/Blake.jpeg": "/static/media/Blake.3283bd880c3108a6bec7.jpeg",
+    "static/media/event8.jpeg": "/static/media/event8.a823fdc3fe579749e5b1.jpeg",
+    "static/media/event4.jpg": "/static/media/event4.d1751d14baf0271d923f.jpg",
+    "static/media/devTour2.jpg": "/static/media/devTour2.0fe8f3ac5241bbabf673.jpg",
+    "static/media/event5.jpg": "/static/media/event5.6083203c91024544b5a7.jpg",
+    "static/media/event6.jpg": "/static/media/event6.e11ef73688cd6ef53de0.jpg",
+    "static/media/event7.jpeg": "/static/media/event7.fcccd42ab20ce52b842e.jpeg",
+    "static/media/devTour.jpg": "/static/media/devTour.e60057ca6baecc89a5e1.jpg",
+    "static/media/event1.jpg": "/static/media/event1.6615004a3f68f4de4a0f.jpg",
+    "static/media/event3.jpg": "/static/media/event3.cc8ab7058307515d8d89.jpg",
+    "static/media/devTourFunny.jpg": "/static/media/devTourFunny.9029edd666c822d20bf5.jpg",
     "static/media/realEstateLogo.png": "/static/media/realEstateLogo.a6dc1be08791378648a7.png",
     "static/media/seidman.jpg": "/static/media/seidman.c6a1359a087569d52a96.jpg",
     "static/media/linkedIn.png": "/static/media/linkedIn.09ca2b4249b5745f4c63.png",
+    "static/media/GR.jpg.webp": "/static/media/GR.jpg.cf7a5f0a46895ee7f1a4.webp",
+    "static/media/victory.jpeg": "/static/media/victory.66db1740975fb021f335.jpeg",
     "static/media/insta.webp": "/static/media/insta.e7211909abd971e81731.webp",
     "index.html": "/index.html",
-    "main.5692b965.css.map": "/static/css/main.5692b965.css.map",
-    "main.a5ff5a1e.js.map": "/static/js/main.a5ff5a1e.js.map",
+    "main.65d9a1be.css.map": "/static/css/main.65d9a1be.css.map",
+    "main.9e164edc.js.map": "/static/js/main.9e164edc.js.map",
     "453.e5407da2.chunk.js.map": "/static/js/453.e5407da2.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.5692b965.css",
-    "static/js/main.a5ff5a1e.js"
+    "static/css/main.65d9a1be.css",
+    "static/js/main.9e164edc.js"
   ]
 }

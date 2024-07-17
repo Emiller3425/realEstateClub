@@ -11,8 +11,7 @@ const port = process.env.PORT || 5001;
 
 // Enable CORS for the frontend origin
 app.use(cors({
-   // origin: 'http://localhost:3000', // Allow your frontend origin
-   origin: 'https://real-estate-club-n46hju7iy-ethan-millers-projects.vercel.app',
+   origin: ['http://localhost:3000', 'https://realestateclubgvsu.com', 'https://real-estate-club-n46hju7iy-ethan-millers-projects.vercel.app'], // Allow your frontend origin
 }));
 
 // Middleware to parse JSON requests
@@ -21,11 +20,13 @@ app.use(bodyParser.json());
 // Middleware to handle multipart/form-data
 const upload = multer({ storage: multer.memoryStorage() });
 
+// Prefix all routes with /api
+
 /**
- * POST /webhook
+ * POST /api/announcements
  * Fetch all documents from the 'announcements' collection in Firestore.
  */
-app.post('/announcements', async (req, res) => {
+app.post('/api/announcements', async (req, res) => {
     try {
         const announcementsRef = db.collection('announcements');
         const snapshot = await announcementsRef.get();
@@ -48,10 +49,10 @@ app.post('/announcements', async (req, res) => {
 });
 
 /**
- * POST /new-announcement
+ * POST /api/new-announcement
  * Add a new announcement to the 'announcements' collection in Firestore.
  */
-app.post('/new-announcement', async (req, res) => {
+app.post('/api/new-announcement', async (req, res) => {
     try {
         const { title, content } = req.body;
         if (!title || !content) {
@@ -90,10 +91,10 @@ app.post('/new-announcement', async (req, res) => {
 });
 
 /**
- * DELETE /delete-announcement/:id
+ * DELETE /api/delete-announcement/:id
  * Delete an announcement from the 'announcements' collection in Firestore.
  */
-app.delete('/delete-announcement/:id', async (req, res) => {
+app.delete('/api/delete-announcement/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const announcementRef = db.collection('announcements').doc(id);
@@ -116,10 +117,10 @@ app.delete('/delete-announcement/:id', async (req, res) => {
 });
 
 /**
- * POST /get-admin-password
+ * POST /api/get-admin-password
  * Fetch the admin password from the 'userProfile' collection in Firestore.
  */
-app.post('/get-admin-password', async (req, res) => {
+app.post('/api/get-admin-password', async (req, res) => {
     try {
         const userProfileRef = db.collection('userProfile').doc('adminAccount');
         const doc = await userProfileRef.get();
@@ -138,10 +139,10 @@ app.post('/get-admin-password', async (req, res) => {
 });
 
 /**
- * GET /home-content
+ * GET /api/home-content
  * Fetch the home content from the 'home' collection in Firestore.
  */
-app.get('/home-content', async (req, res) => {
+app.get('/api/home-content', async (req, res) => {
     try {
         const homeContentRef = db.collection('home').doc('homeContent');
         const ourMissionRef = db.collection('home').doc('ourMission');
@@ -174,10 +175,10 @@ app.get('/home-content', async (req, res) => {
 });
 
 /**
- * POST /update-home-content
+ * POST /api/update-home-content
  * Update the home content in the 'home' collection in Firestore.
  */
-app.post('/update-home-content', async (req, res) => {
+app.post('/api/update-home-content', async (req, res) => {
     try {
         const { welcomeMessage, nextMeeting, mission } = req.body;
 
@@ -203,10 +204,10 @@ app.post('/update-home-content', async (req, res) => {
 });
 
 /**
- * GET /about
+ * GET /api/about
  * Fetch all documents from the 'about' collection in Firestore.
  */
-app.get('/about', async (req, res) => {
+app.get('/api/about', async (req, res) => {
     try {
         const aboutRef = db.collection('about');
         const snapshot = await aboutRef.get();
@@ -240,10 +241,10 @@ app.get('/about', async (req, res) => {
 });
 
 /**
- * POST /update-about-title
+ * POST /api/update-about-title
  * Update the about title and content in Firestore.
  */
-app.post('/update-about-title', async (req, res) => {
+app.post('/api/update-about-title', async (req, res) => {
     try {
         const { title, content } = req.body;
         const aboutTitleRef = db.collection('about').doc('aboutTitle');
@@ -257,12 +258,11 @@ app.post('/update-about-title', async (req, res) => {
     }
 });
 
-
 /**
- * POST /new-member
+ * POST /api/new-member
  * Add a new member profile to Firestore.
  */
-app.post('/new-member', upload.single('image'), async (req, res) => {
+app.post('/api/new-member', upload.single('image'), async (req, res) => {
     try {
         const { name, title, email, description, order } = req.body;
         const file = req.file;
@@ -323,10 +323,10 @@ app.post('/new-member', upload.single('image'), async (req, res) => {
 });
 
 /**
- * DELETE /delete-member/:id
+ * DELETE /api/delete-member/:id
  * Delete a member profile from Firestore and its associated image from Firebase Storage.
  */
-app.delete('/delete-member/:id', async (req, res) => {
+app.delete('/api/delete-member/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const memberRef = db.collection('about').doc(id);
@@ -356,10 +356,10 @@ app.delete('/delete-member/:id', async (req, res) => {
 });
 
 /**
- * POST /update-member
+ * POST /api/update-member
  * Update a member profile in Firestore.
  */
-app.post('/update-member', upload.single('image'), async (req, res) => {
+app.post('/api/update-member', upload.single('image'), async (req, res) => {
     try {
         const { id, name, title, email, description, order } = req.body;
         const file = req.file;

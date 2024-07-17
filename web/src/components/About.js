@@ -14,10 +14,12 @@ const About = ({ adminAccess }) => {
     order: 0,
   });
 
+  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://realestateclubgvsu.com/api';
+
   useEffect(() => {
     const fetchMembersContent = async () => {
       try {
-        const response = await fetch('http://localhost:5001/about');
+        const response = await fetch(`${API_URL}/about`);
         const data = await response.json();
         setTitle(data.title);
         setContent(data.content);
@@ -28,7 +30,7 @@ const About = ({ adminAccess }) => {
     };
 
     fetchMembersContent();
-  }, []);
+  }, [API_URL]);
 
   const handleChange = (index, field, value) => {
     const updatedMembers = [...membersContent];
@@ -63,7 +65,7 @@ const About = ({ adminAccess }) => {
       formData.append('image', newMember.image);
       formData.append('order', membersContent.length);
 
-      const response = await fetch('http://localhost:5001/new-member', {
+      const response = await fetch(`${API_URL}/new-member`, {
         method: 'POST',
         body: formData,
       });
@@ -89,7 +91,7 @@ const About = ({ adminAccess }) => {
 
   const deleteMember = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5001/delete-member/${id}`, {
+      const response = await fetch(`${API_URL}/delete-member/${id}`, {
         method: 'DELETE',
       });
 
@@ -118,7 +120,7 @@ const About = ({ adminAccess }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:5001/update-member', {
+      const response = await fetch(`${API_URL}/update-member`, {
         method: 'POST',
         body: formData,
       });
@@ -135,7 +137,7 @@ const About = ({ adminAccess }) => {
 
   const updateTitleAndContent = async () => {
     try {
-      const response = await fetch('http://localhost:5001/update-about-title', {
+      const response = await fetch(`${API_URL}/update-about-title`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,8 +165,6 @@ const About = ({ adminAccess }) => {
 
     updatedMembers[index].order -= direction;
     updatedMembers[swapIndex].order += direction;
-    console.log(updatedMembers);
-
 
     setMembersContent(updatedMembers);
 

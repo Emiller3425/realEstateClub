@@ -27,6 +27,7 @@ const Calendar = () => {
         <div style={{ position: 'absolute' }}>Loading...</div>
       )}
       <iframe
+        title="Real Estate Club Calendar"
         ref={iframeRef}
         src="https://calendar.google.com/calendar/embed?src=gvsurealestateclub%40gmail.com&ctz=America%2FDetroit"
         style={{

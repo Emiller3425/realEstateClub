@@ -4,6 +4,8 @@ const Login = ({ setAdminAccess }) => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://realestateclubgvsu.com/api';
+
   const handleChange = (e) => {
     setPassword(e.target.value);
   };
@@ -11,7 +13,7 @@ const Login = ({ setAdminAccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5001/get-admin-password', {
+      const response = await fetch(`${API_URL}/get-admin-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

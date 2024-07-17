@@ -34,11 +34,13 @@ const Home = ({ adminAccess }) => {
   });
   const [shuffledImages, setShuffledImages] = useState([]);
 
+  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://realestateclubgvsu.com/api';
+
   useEffect(() => {
     // Fetch content from the server when the component mounts
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:5001/home-content');
+        const response = await fetch(`${API_URL}/home-content`);
         const data = await response.json();
         setContent({
           welcomeMessage: data.welcomeMessage,
@@ -65,7 +67,7 @@ const Home = ({ adminAccess }) => {
 
     // Clear the interval when the component unmounts
     return () => clearInterval(interval);
-  }, []);
+  }, [API_URL]);
 
   // Handle changes to the input fields in edit mode
   const handleChange = (e) => {
@@ -76,7 +78,7 @@ const Home = ({ adminAccess }) => {
   // Handle saving the updated content to the server
   const handleSave = async () => {
     try {
-      const response = await fetch('http://localhost:5001/update-home-content', {
+      const response = await fetch(`${API_URL}/update-home-content`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

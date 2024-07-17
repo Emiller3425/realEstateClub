@@ -49,10 +49,12 @@ export default function Announcements({ adminAccess }) {
   const [title, setTitle] = useState('');
   const editorRef = useRef(null);
 
+  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://realestateclubgvsu.com/api';
+
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const response = await fetch('http://localhost:5001/announcements', {
+        const response = await fetch(`${API_URL}/announcements`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -72,7 +74,7 @@ export default function Announcements({ adminAccess }) {
     };
 
     fetchAnnouncements();
-  }, []);
+  }, [API_URL]);
 
   const focusEditor = () => {
     if (editorRef.current) {
@@ -120,7 +122,7 @@ export default function Announcements({ adminAccess }) {
 
   const handlePostAnnouncement = async () => {
     try {
-      const response = await fetch('http://localhost:5001/new-announcement', {
+      const response = await fetch(`${API_URL}/new-announcement`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +150,7 @@ export default function Announcements({ adminAccess }) {
 
   const deleteAnnouncement = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5001/delete-announcement/${id}`, {
+      const response = await fetch(`${API_URL}/delete-announcement/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

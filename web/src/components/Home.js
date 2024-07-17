@@ -34,7 +34,7 @@ const Home = ({ adminAccess }) => {
   });
   const [shuffledImages, setShuffledImages] = useState([]);
 
-  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://https://real-estate-club-scqb.vercel.app/api';
+  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://https://real-estate-club.vercel.app/api';
 
   useEffect(() => {
     // Fetch content from the server when the component mounts

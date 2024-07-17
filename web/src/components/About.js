@@ -14,7 +14,7 @@ const About = ({ adminAccess }) => {
     order: 0,
   });
 
-  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://https://real-estate-club-scqb.vercel.app/api';
+  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://https://real-estate-club.vercel.app/api';
 
   useEffect(() => {
     const fetchMembersContent = async () => {

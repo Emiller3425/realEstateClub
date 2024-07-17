@@ -49,7 +49,7 @@ export default function Announcements({ adminAccess }) {
   const [title, setTitle] = useState('');
   const editorRef = useRef(null);
 
-  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://https://real-estate-club-scqb.vercel.app/api';
+  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://https://real-estate-club.vercel.app/api';
 
   useEffect(() => {
     const fetchAnnouncements = async () => {

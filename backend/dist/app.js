@@ -115,17 +115,21 @@ app.post('/api/get-admin-password', (req, res) => __awaiter(void 0, void 0, void
     }
 }));
 
-app.get('/api/home-content', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/api/home-content', async (req, res) => {
     try {
         const homeContentRef = firebaseconfig_1.db.collection('home').doc('homeContent');
         const ourMissionRef = firebaseconfig_1.db.collection('home').doc('ourMission');
-        const [homeContentDoc, ourMissionDoc] = yield Promise.all([homeContentRef.get(), ourMissionRef.get()]);
+
+        const [homeContentDoc, ourMissionDoc] = await Promise.all([homeContentRef.get(), ourMissionRef.get()]);
+
         if (!homeContentDoc.exists || !ourMissionDoc.exists) {
-            res.status(404).json({ error: 'Home content not found' });
-            return;
+            console.error('Error: Home content or mission content not found');
+            return res.status(404).json({ error: 'Home content not found' });
         }
+
         const homeContent = homeContentDoc.data();
         const ourMission = ourMissionDoc.data();
+
         res.json({
             welcomeMessage: homeContent.welcomeMessage,
             nextMeeting: {
@@ -137,12 +141,35 @@ app.get('/api/home-content', (req, res) => __awaiter(void 0, void 0, void 0, fun
                 content: ourMission.content
             }
         });
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error fetching home content:', error);
-        res.status(500).json({ error: 'Internal Error' });
+
+        // Check for Firestore errors
+        if (error.code) {
+            switch (error.code) {
+                case 'permission-denied':
+                    res.status(403).json({ error: 'Permission denied' });
+                    break;
+                case 'unavailable':
+                    res.status(503).json({ error: 'Service unavailable' });
+                    break;
+                default:
+                    res.status(500).json({ error: 'Firestore error' });
+                    break;
+            }
+        } else if (error.response) {
+            // Axios or fetch error
+            res.status(error.response.status).json({ error: error.response.statusText });
+        } else if (error.request) {
+            // Network error
+            res.status(503).json({ error: 'Network error' });
+        } else {
+            // Other errors
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
     }
-}));
+});
+
 
 app.post('/api/update-home-content', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

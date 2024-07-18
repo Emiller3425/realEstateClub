@@ -4,7 +4,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -16,8 +15,42 @@ const express_1 = __importDefault(require("express"));
 const firebaseconfig_1 = require("./firebaseconfig");
 const app = (0, express_1.default)();
 const port = process.env.PORT || 5001;
+
 app.use(express_1.default.json());
-app.post('/webhook', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+
+app.get('/api/home-content', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const homeContentRef = firebaseconfig_1.db.collection('home').doc('homeContent');
+        const ourMissionRef = firebaseconfig_1.db.collection('home').doc('ourMission');
+
+        const [homeContentDoc, ourMissionDoc] = yield Promise.all([homeContentRef.get(), ourMissionRef.get()]);
+
+        if (!homeContentDoc.exists || !ourMissionDoc.exists) {
+            res.status(404).json({ error: 'Home content not found' });
+            return;
+        }
+
+        const homeContent = homeContentDoc.data();
+        const ourMission = ourMissionDoc.data();
+
+        res.json({
+            welcomeMessage: homeContent.welcomeMessage,
+            nextMeeting: {
+                title: homeContent.title,
+                content: homeContent.content
+            },
+            mission: {
+                title: ourMission.title,
+                content: ourMission.content
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching home content:', error);
+        res.status(500).json({ error: 'Internal Error' });
+    }
+}));
+
+app.post('/api/webhook', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const docRef = firebaseconfig_1.db.collection('announcements').doc('Announcement1');
         const doc = yield docRef.get();
@@ -27,14 +60,15 @@ app.post('/webhook', (req, res) => __awaiter(void 0, void 0, void 0, function* (
         else {
             res.status(404).json({ error: 'Document not found' });
         }
-    }
-    catch (error) {
+    } catch (error) {
         res.status(500).json({ error: "Internal Error" });
     }
 }));
+
 const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
 // Graceful shutdown
 const shutdown = () => {
     console.log('Shutting down server...');
@@ -48,5 +82,6 @@ const shutdown = () => {
         process.exit(1);
     }, 10000);
 };
+
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);

@@ -50,7 +50,16 @@ const Home = ({ adminAccess }) => {
           mission: data.mission.content,
         });
       } catch (error) {
-        console.error('Error fetching content:', error);
+        // Determine the type of error and log specific messages
+        if (error.name === 'TypeError') {
+          console.error('Network error or the request was aborted:', error);
+        } else if (error.message.startsWith('HTTP error! status:')) {
+          console.error('Server responded with a status:', error.message);
+        } else if (error.message === 'Invalid data structure') {
+          console.error('Received data does not match the expected format:', error);
+        } else {
+          console.error('Error fetching content:', error);
+        }
       }
     };
 

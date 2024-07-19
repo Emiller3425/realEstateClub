@@ -18,30 +18,21 @@ function App() {
   const [adminAccess, setAdminAccess] = useState(false);
 
   return (
-    <Router>
-      <div 
-      style={{ fontFamily: 'Gill Sans, sans-serif' }} className="flex flex-col min-h-screen">
+    <Router basename="/">
+      <div style={{ fontFamily: 'Gill Sans, sans-serif' }} className="flex flex-col min-h-screen">
         {/* Banner with Logo and Login button */}
         <div className="header-container bg-dark-gray text-white py-4 flex justify-between items-center">
           <div className="flex items-center">
             <img src={realEstateLogo} alt="Real Estate Logo" className="h-20 mr-2" />
-            <div>
-              {/* Welcome Message */}
-            </div>
           </div>
           <div className="mr-4">
             {/* Login button */}
             {adminAccess ? (
-              <button
-                className="bg-white text-navy py-2 px-4 rounded-lg btn"
-              >
+              <button className="bg-white text-navy py-2 px-4 rounded-lg btn">
                 Logout
               </button>
             ) : (
-              <Link
-                className="bg-white text-navy py-2 px-4 rounded-lg btn"
-                to="/login"
-              >
+              <Link className="bg-white text-navy py-2 px-4 rounded-lg btn" to="/login">
                 Login
               </Link>
             )}
@@ -64,9 +55,7 @@ function App() {
         </div>
 
         {/* Footer */}
-        <footer 
-          className="w-full bg-dark-gray text-white py-4 text-center mt-auto"
-        >
+        <footer className="w-full bg-dark-gray text-white py-4 text-center mt-auto">
           <h2>@2024 by Real Estate Club GVSU</h2>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
             <a href="https://www.instagram.com/gvsurealestate/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>

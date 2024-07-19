@@ -361,6 +361,9 @@ app.post('/api/update-member', upload.single('image'), async (req, res) => {
 
 // Catch-all handler to serve index.html for client-side routes
 app.get('*', (req, res) => {
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'Not Found' });
+    }
     res.sendFile(path.join(__dirname, '../../build', 'index.html'));
 });
 

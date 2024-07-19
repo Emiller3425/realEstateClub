@@ -1,6 +1,7 @@
 "use strict";
 
 const express = require('express');
+const path = require('path');
 const bodyParser = require('body-parser');
 const { db, bucket } = require('./firebaseconfig');
 const cors = require('cors');
@@ -11,7 +12,7 @@ const port = process.env.PORT || 5001;
 
 // Enable CORS for the frontend origin
 app.use(cors({
-   origin: ['http://localhost:3000', 'https://realestateclubgvsu.com', 'https://real-estate-club.vercel.app'], // Allow your frontend origin
+    origin: ['http://localhost:3000', 'https://realestateclubgvsu.com', 'https://real-estate-club.vercel.app'], // Allow your frontend origin
 }));
 
 // Middleware to parse JSON requests
@@ -19,6 +20,9 @@ app.use(bodyParser.json());
 
 // Middleware to handle multipart/form-data
 const upload = multer({ storage: multer.memoryStorage() });
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, 'build')));
 
 // Prefix all routes with /api
 
@@ -407,6 +411,11 @@ app.post('/api/update-member', upload.single('image'), async (req, res) => {
         console.error('Error updating member:', error);
         res.status(500).json({ error: "Internal Error" });
     }
+});
+
+// Catch-all handler to serve index.html for client-side routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 // Start the server

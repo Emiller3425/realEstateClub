@@ -1,9 +1,8 @@
 "use strict";
 
 const express = require('express');
-const path = require('path');
 const bodyParser = require('body-parser');
-const { db, bucket } = require('../firebaseconfig');
+const { db, bucket } = require('./firebaseconfig');
 const cors = require('cors');
 const multer = require('multer');
 
@@ -12,7 +11,7 @@ const port = process.env.PORT || 5001;
 
 // Enable CORS for the frontend origin
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://realestateclubgvsu.com', 'https://real-estate-club.vercel.app'], // Allow your frontend origin
+   origin: ['http://localhost:3000', 'https://realestateclubgvsu.com', 'https://real-estate-club.vercel.app'], // Allow your frontend origin
 }));
 
 // Middleware to parse JSON requests
@@ -21,10 +20,12 @@ app.use(bodyParser.json());
 // Middleware to handle multipart/form-data
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../../build')));
+// Prefix all routes with /api
 
-// API Routes
+/**
+ * POST /api/announcements
+ * Fetch all documents from the 'announcements' collection in Firestore.
+ */
 app.post('/api/announcements', async (req, res) => {
     try {
         const announcementsRef = db.collection('announcements');
@@ -47,6 +48,10 @@ app.post('/api/announcements', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/new-announcement
+ * Add a new announcement to the 'announcements' collection in Firestore.
+ */
 app.post('/api/new-announcement', async (req, res) => {
     try {
         const { title, content } = req.body;
@@ -85,12 +90,17 @@ app.post('/api/new-announcement', async (req, res) => {
     }
 });
 
+/**
+ * DELETE /api/delete-announcement/:id
+ * Delete an announcement from the 'announcements' collection in Firestore.
+ */
 app.delete('/api/delete-announcement/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const announcementRef = db.collection('announcements').doc(id);
         await announcementRef.delete();
 
+        // Fetch updated list of announcements
         const announcementsRef = db.collection('announcements');
         const snapshot = await announcementsRef.get();
 
@@ -106,6 +116,10 @@ app.delete('/api/delete-announcement/:id', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/get-admin-password
+ * Fetch the admin password from the 'userProfile' collection in Firestore.
+ */
 app.post('/api/get-admin-password', async (req, res) => {
     try {
         const userProfileRef = db.collection('userProfile').doc('adminAccount');
@@ -124,6 +138,10 @@ app.post('/api/get-admin-password', async (req, res) => {
     }
 });
 
+/**
+ * GET /api/home-content
+ * Fetch the home content from the 'home' collection in Firestore.
+ */
 app.get('/api/home-content', async (req, res) => {
     try {
         const homeContentRef = db.collection('home').doc('homeContent');
@@ -156,6 +174,10 @@ app.get('/api/home-content', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/update-home-content
+ * Update the home content in the 'home' collection in Firestore.
+ */
 app.post('/api/update-home-content', async (req, res) => {
     try {
         const { welcomeMessage, nextMeeting, mission } = req.body;
@@ -181,6 +203,10 @@ app.post('/api/update-home-content', async (req, res) => {
     }
 });
 
+/**
+ * GET /api/about
+ * Fetch all documents from the 'about' collection in Firestore.
+ */
 app.get('/api/about', async (req, res) => {
     try {
         const aboutRef = db.collection('about');
@@ -204,6 +230,7 @@ app.get('/api/about', async (req, res) => {
             }
         });
 
+        // Sort members by order field
         aboutContent.sort((a, b) => a.order - b.order);
 
         res.json({ title, content, members: aboutContent });
@@ -213,6 +240,10 @@ app.get('/api/about', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/update-about-title
+ * Update the about title and content in Firestore.
+ */
 app.post('/api/update-about-title', async (req, res) => {
     try {
         const { title, content } = req.body;
@@ -227,6 +258,10 @@ app.post('/api/update-about-title', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/new-member
+ * Add a new member profile to Firestore.
+ */
 app.post('/api/new-member', upload.single('image'), async (req, res) => {
     try {
         const { name, title, email, description, order } = req.body;
@@ -237,6 +272,7 @@ app.post('/api/new-member', upload.single('image'), async (req, res) => {
             return;
         }
 
+        // Upload image to Firebase Storage
         const blob = bucket.file(`profiles/${file.originalname}`);
         const blobStream = blob.createWriteStream({
             metadata: {
@@ -252,8 +288,10 @@ app.post('/api/new-member', upload.single('image'), async (req, res) => {
         blobStream.on('finish', async () => {
             const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
 
+            // Make the file publicly accessible
             await blob.makePublic();
 
+            // Save the member profile to Firestore
             const newMemberRef = db.collection('about').doc();
             await newMemberRef.set({
                 name,
@@ -261,7 +299,7 @@ app.post('/api/new-member', upload.single('image'), async (req, res) => {
                 email,
                 description,
                 image: imageUrl,
-                order: parseInt(order, 10)
+                order: parseInt(order, 10) // Ensure order is saved as a number
             });
 
             const newMember = {
@@ -284,6 +322,10 @@ app.post('/api/new-member', upload.single('image'), async (req, res) => {
     }
 });
 
+/**
+ * DELETE /api/delete-member/:id
+ * Delete a member profile from Firestore and its associated image from Firebase Storage.
+ */
 app.delete('/api/delete-member/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -297,10 +339,12 @@ app.delete('/api/delete-member/:id', async (req, res) => {
 
         const memberData = memberDoc.data();
         const imageUrl = memberData.image;
-        const fileName = imageUrl.split('/').pop().split('?')[0];
+        const fileName = imageUrl.split('/').pop().split('?')[0]; // Extract file name from URL
 
+        // Delete the Firestore document
         await memberRef.delete();
 
+        // Delete the associated image from Firebase Storage
         const file = bucket.file(`profiles/${fileName}`);
         await file.delete();
 
@@ -311,6 +355,10 @@ app.delete('/api/delete-member/:id', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/update-member
+ * Update a member profile in Firestore.
+ */
 app.post('/api/update-member', upload.single('image'), async (req, res) => {
     try {
         const { id, name, title, email, description, order } = req.body;
@@ -325,6 +373,7 @@ app.post('/api/update-member', upload.single('image'), async (req, res) => {
         const memberData = { name, title, email, description, order: parseInt(order, 10) };
 
         if (file) {
+            // Upload new image to Firebase Storage
             const blob = bucket.file(`profiles/${file.originalname}`);
             const blobStream = blob.createWriteStream({
                 metadata: {
@@ -340,6 +389,7 @@ app.post('/api/update-member', upload.single('image'), async (req, res) => {
             blobStream.on('finish', async () => {
                 const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
 
+                // Make the file publicly accessible
                 await blob.makePublic();
 
                 memberData.image = imageUrl;
@@ -359,14 +409,6 @@ app.post('/api/update-member', upload.single('image'), async (req, res) => {
     }
 });
 
-// Catch-all handler to serve index.html for client-side routes
-app.get('*', (req, res) => {
-    if (req.path.startsWith('/api/')) {
-        return res.status(404).json({ error: 'Not Found' });
-    }
-    res.sendFile(path.join(__dirname, '../../build', 'index.html'));
-});
-
 // Start the server
 const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
@@ -380,11 +422,13 @@ const shutdown = () => {
         process.exit(0);
     });
 
+    // Force shutdown after 10 seconds
     setTimeout(() => {
         console.error('Forcing shutdown');
         process.exit(1);
     }, 10000);
 };
 
+// Handle termination signals
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);

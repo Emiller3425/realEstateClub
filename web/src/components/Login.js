@@ -4,7 +4,11 @@ const Login = ({ setAdminAccess }) => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://real-estate-club.vercel.app/api';
+  const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5001/api' 
+  : (window.location.hostname === 'gvsurealestateclub.com' 
+      ? 'https://gvsurealestateclub.com/api' 
+      : 'https://real-estate-club.vercel.app/api');
 
   const handleChange = (e) => {
     setPassword(e.target.value);

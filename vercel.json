@@ -15,6 +15,9 @@
         "src": "/api/(.*)",
         "dest": "backend/dist/app.js"
       },
-      { "src": "/[^.]+", "dest": "/", "status": 200 }
+      {
+        "src": "/(.*)",
+        "dest": "web/build/index.html"
+      }
     ]
   }

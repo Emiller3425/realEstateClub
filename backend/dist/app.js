@@ -513,6 +513,14 @@ app.post('/api/update-member', upload.single('image'), async (req, res) => {
     }
 });
 
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../../web/build')));
+
+// The "catchall" handler: for any request that doesn't match any route, send back React's index.html file.
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../web/build', 'index.html'));
+});
+
 // Start the server
 const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

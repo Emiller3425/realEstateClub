@@ -8,8 +8,12 @@ const firebase_admin_1 = __importDefault(require("firebase-admin"));
 // Initialize the Firebase app with a service account, granting admin privileges
 const serviceAccount = require('../config/realestateclub-584d7-firebase-adminsdk-5wrv6-ac5b7aaa7b.json');
 firebase_admin_1.default.initializeApp({
-    credential: firebase_admin_1.default.credential.cert(serviceAccount)
+    credential: firebase_admin_1.default.credential.cert(serviceAccount),
+    storageBucket: 'gs://realestateclub-584d7.appspot.com'
 });
 // Get a reference to the Firestore service
 const db = firebase_admin_1.default.firestore();
 exports.db = db;
+
+const bucket = firebase_admin_1.default.storage().bucket();
+exports.bucket = bucket;

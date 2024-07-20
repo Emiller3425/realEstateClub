@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
 const Resources = ({ adminAccess }) => {
-  const [editMode, setEditMode] = useState(false);
   const [resources, setResources] = useState([]);
   const [newResource, setNewResource] = useState({
     name: '',
     description: '',
     file: null,
   });
+  const [editMode, setEditMode] = useState(false);
 
   const API_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:5001/api' 
@@ -19,6 +19,9 @@ const Resources = ({ adminAccess }) => {
     const fetchResources = async () => {
       try {
         const response = await fetch(`${API_URL}/resources`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
         const data = await response.json();
         setResources(data);
       } catch (error) {
@@ -36,6 +39,7 @@ const Resources = ({ adminAccess }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      console.log('File selected:', file); // Log file details for debugging
       handleNewResourceChange('file', file);
     }
   };
@@ -46,6 +50,8 @@ const Resources = ({ adminAccess }) => {
       formData.append('name', newResource.name);
       formData.append('description', newResource.description);
       formData.append('file', newResource.file);
+
+      console.log('New resource to be added:', newResource); // Log newResource details for debugging
 
       const response = await fetch(`${API_URL}/new-resource`, {
         method: 'POST',
@@ -89,14 +95,11 @@ const Resources = ({ adminAccess }) => {
       <h1 className="text-4xl font-bold" style={{ textAlign: 'center', padding: '30px' }}>Resources</h1>
       {resources.map((resource, index) => (
         <div key={index} style={{ marginBottom: '20px', padding: '20px', borderBottom: '1px solid #ccc' }}>
-          <h2 className="text-3xl font-bold">{resource.name}</h2>
+          <h2 className="text-2xl font-bold">{resource.name}</h2>
           <p>{resource.description}</p>
           <div style={{ marginTop: '10px' }}>
-            <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer" className="bg-blue-500 text-white py-2 px-4 rounded-lg">
+            <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer" className="bg-navy text-white py-2 px-4 rounded-lg">
               Preview
-            </a>
-            <a href={resource.fileUrl} download className="bg-green-500 text-white py-2 px-4 rounded-lg" style={{ marginLeft: '10px' }}>
-              Download
             </a>
             {adminAccess && (
               <button

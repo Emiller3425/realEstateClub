@@ -22,17 +22,14 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // Prefix all routes with /api
 
-/**
- * POST /api/resources
- * Fetch all documents from the 'resources' collection in Firestore.
- */
-app.post('/api/resources', async (req, res) => {
+// Fetch all resources
+app.get('/api/resources', async (req, res) => {
     try {
         const resourcesRef = db.collection('resources');
-        const snapshot = await resourcesRef.get();
-        console.log(snapshot);
+        const snapshot = await resourcesRef.orderBy('timestamp', 'asc').get();
 
         if (snapshot.empty) {
+            console.log('No resources found');
             res.status(404).json({ error: 'No resources found' });
             return;
         }
@@ -49,38 +46,37 @@ app.post('/api/resources', async (req, res) => {
     }
 });
 
-/**
- * POST /api/new-resource
- * Add a new resource to the 'resources' collection in Firestore.
- */
+// Add a new resource
 app.post('/api/new-resource', upload.single('file'), async (req, res) => {
-    try {
-        const { name, description } = req.body;
-        const file = req.file;
+    console.log('Request body:', req.body);
+    console.log('Request file:', req.file);
 
-        if (!name || !description || !file) {
-            res.status(400).json({ error: 'Name, description, and file are required' });
-            return;
+    const { name, description } = req.body;
+    const file = req.file;
+
+    if (!name || !description || !file) {
+        console.log('Missing required fields: name, description, or file');
+        res.status(400).json({ error: 'Name, description, and file are required' });
+        return;
+    }
+
+    const blob = bucket.file(`resources/${file.originalname}`);
+    const blobStream = blob.createWriteStream({
+        metadata: {
+            contentType: file.mimetype
         }
+    });
 
-        // Upload file to Firebase Storage
-        const blob = bucket.file(`resources/${file.originalname}`);
-        const blobStream = blob.createWriteStream({
-            metadata: {
-                contentType: file.mimetype
-            }
-        });
+    blobStream.on('error', (err) => {
+        console.error('Error uploading file:', err);
+        res.status(500).json({ error: "Internal Error" });
+    });
 
-        blobStream.on('error', (err) => {
-            console.error('Error uploading file:', err);
-            res.status(500).json({ error: "Internal Error" });
-        });
-
-        blobStream.on('finish', async () => {
+    blobStream.on('finish', async () => {
+        try {
             const fileUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
             await blob.makePublic();
 
-            // Save the resource document to Firestore
             const newResourceRef = db.collection('resources').doc();
             const timestamp = new Date();
 
@@ -92,18 +88,16 @@ app.post('/api/new-resource', upload.single('file'), async (req, res) => {
             });
 
             res.status(201).json({ message: 'Resource added successfully' });
-        });
+        } catch (err) {
+            console.error('Error finalizing resource upload:', err);
+            res.status(500).json({ error: "Internal Error" });
+        }
+    });
 
-        blobStream.end(file.buffer);
-    } catch (error) {
-        console.error('Error adding resource:', error);
-        res.status(500).json({ error: "Internal Error" });
-    }
+    blobStream.end(file.buffer);
 });
-/**
- * DELETE /api/delete-resource/:id
- * Delete a resource from the 'resources' collection in Firestore and its associated file from Firebase Storage.
- */
+
+// Delete a resource
 app.delete('/api/delete-resource/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -111,6 +105,7 @@ app.delete('/api/delete-resource/:id', async (req, res) => {
         const resourceDoc = await resourceRef.get();
 
         if (!resourceDoc.exists) {
+            console.log('Resource not found:', id);
             res.status(404).json({ error: 'Resource not found' });
             return;
         }
@@ -129,6 +124,7 @@ app.delete('/api/delete-resource/:id', async (req, res) => {
         res.status(500).json({ error: "Internal Error" });
     }
 });
+
 
 /**
  * POST /api/announcements

@@ -10,14 +10,5 @@
       "use": "@vercel/static"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "backend/dist/app.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "web/build/$1"
-    }
-  ]
+  "routes": [{ "src": "/[^.]+", "dest": "/", "status": 200 }]
 }

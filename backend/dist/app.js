@@ -23,6 +23,114 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Prefix all routes with /api
 
 /**
+ * POST /api/resources
+ * Fetch all documents from the 'resources' collection in Firestore.
+ */
+app.post('/api/resources', async (req, res) => {
+    try {
+        const resourcesRef = db.collection('resources');
+        const snapshot = await resourcesRef.get();
+        console.log(snapshot);
+
+        if (snapshot.empty) {
+            res.status(404).json({ error: 'No resources found' });
+            return;
+        }
+
+        const resources = [];
+        snapshot.forEach(doc => {
+            resources.push({ id: doc.id, ...doc.data() });
+        });
+
+        res.json(resources);
+    } catch (error) {
+        console.error('Error fetching resources:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+/**
+ * POST /api/new-resource
+ * Add a new resource to the 'resources' collection in Firestore.
+ */
+app.post('/api/new-resource', upload.single('file'), async (req, res) => {
+    try {
+        const { name, description } = req.body;
+        const file = req.file;
+
+        if (!name || !description || !file) {
+            res.status(400).json({ error: 'Name, description, and file are required' });
+            return;
+        }
+
+        // Upload file to Firebase Storage
+        const blob = bucket.file(`resources/${file.originalname}`);
+        const blobStream = blob.createWriteStream({
+            metadata: {
+                contentType: file.mimetype
+            }
+        });
+
+        blobStream.on('error', (err) => {
+            console.error('Error uploading file:', err);
+            res.status(500).json({ error: "Internal Error" });
+        });
+
+        blobStream.on('finish', async () => {
+            const fileUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+            await blob.makePublic();
+
+            // Save the resource document to Firestore
+            const newResourceRef = db.collection('resources').doc();
+            const timestamp = new Date();
+
+            await newResourceRef.set({
+                name,
+                description,
+                fileUrl,
+                timestamp
+            });
+
+            res.status(201).json({ message: 'Resource added successfully' });
+        });
+
+        blobStream.end(file.buffer);
+    } catch (error) {
+        console.error('Error adding resource:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+/**
+ * DELETE /api/delete-resource/:id
+ * Delete a resource from the 'resources' collection in Firestore and its associated file from Firebase Storage.
+ */
+app.delete('/api/delete-resource/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const resourceRef = db.collection('resources').doc(id);
+        const resourceDoc = await resourceRef.get();
+
+        if (!resourceDoc.exists) {
+            res.status(404).json({ error: 'Resource not found' });
+            return;
+        }
+
+        const resourceData = resourceDoc.data();
+        const fileUrl = resourceData.fileUrl;
+        const fileName = fileUrl.split('/').pop().split('?')[0];
+
+        await resourceRef.delete();
+        const file = bucket.file(`resources/${fileName}`);
+        await file.delete();
+
+        res.status(200).json({ message: 'Resource deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting resource:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+/**
  * POST /api/announcements
  * Fetch all documents from the 'announcements' collection in Firestore.
  */

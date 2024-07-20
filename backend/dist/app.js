@@ -22,14 +22,6 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // Prefix all routes with /api
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../../web/build')));
-
-// The "catchall" handler: for any request that doesn't match any route, send back React's index.html file.
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../web/build', 'index.html'));
-});
-
 // Fetch all resources
 app.get('/api/resources', async (req, res) => {
     try {

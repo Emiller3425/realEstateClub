@@ -513,6 +513,18 @@ app.post('/api/update-member', upload.single('image'), async (req, res) => {
     }
 });
 
+app.use(express.static(path.join(__dirname, '../../web/build')));
+
+app.get('*', (req, res) => {
+    if (req.url.startsWith('/api')) {
+        // If the request is for an API endpoint, return a 404 error
+        res.status(404).json({ error: 'API route not found' });
+    } else {
+        // For any other request, send back React's index.html file
+        res.sendFile(path.join(__dirname, '../../web/build', 'index.html'));
+    }
+});
+
 // Start the server
 const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

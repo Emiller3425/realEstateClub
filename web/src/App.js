@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom';
 import './App.css';
 import 'tailwindcss/tailwind.css';
 import './output.css';
@@ -16,67 +16,61 @@ import Resources from './components/Resources';
 
 function App() {
   const [adminAccess, setAdminAccess] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (location.pathname !== '/') {
-      navigate('/');
-    }
-  }, []); // Empty dependency array ensures this runs only once on mount
 
   return (
-    <div style={{ fontFamily: 'Gill Sans, sans-serif' }} className="flex flex-col min-h-screen">
-      {/* Banner with Logo and Login button */}
-      <div className="header-container bg-dark-gray text-white py-4 flex justify-between items-center">
-        <div className="flex items-center">
-          <img src={realEstateLogo} alt="Real Estate Logo" className="h-20 mr-2" />
+    <Router basename="/">
+      <div style={{ fontFamily: 'Gill Sans, sans-serif' }} className="flex flex-col min-h-screen">
+        {/* Banner with Logo and Login button */}
+        <div className="header-container bg-dark-gray text-white py-4 flex justify-between items-center">
+          <div className="flex items-center">
+            <img src={realEstateLogo} alt="Real Estate Logo" className="h-20 mr-2" />
+          </div>
+          <div className="mr-4">
+            {/* Login button */}
+            {adminAccess ? (
+              <button className="bg-white text-navy py-2 px-4 rounded-lg btn">
+                Logout
+              </button>
+            ) : (
+              <Link className="bg-white text-navy py-2 px-4 rounded-lg btn" to="/login">
+                Login
+              </Link>
+            )}
+          </div>
         </div>
-        <div className="mr-4">
-          {/* Login button */}
-          {adminAccess ? (
-            <button className="bg-white text-navy py-2 px-4 rounded-lg btn">
-              Logout
-            </button>
-          ) : (
-            <Link className="bg-white text-navy py-2 px-4 rounded-lg btn" to="/login">
-              Login
-            </Link>
-          )}
+
+        {/* Tabs */}
+        <Tabs />
+
+        {/* Main content */}
+        <div className="flex-grow flex justify-center">
+          <Routes>
+            <Route path="/" element={<Home adminAccess={adminAccess} />} />
+            <Route path="/announcements" element={<Announcements adminAccess={adminAccess} />} />
+            <Route path="/calendar" element={<Calendar adminAccess={adminAccess} />} />
+            <Route path="/about" element={<About adminAccess={adminAccess} />} />
+            <Route path="/login" element={<Login setAdminAccess={setAdminAccess} />} />
+            <Route path="/resources" element={<Resources adminAccess={adminAccess} />} />
+          </Routes>
         </div>
+
+        {/* Footer */}
+        <footer className="w-full bg-dark-gray text-white py-4 text-center mt-auto">
+          <h2>@2024 by Real Estate Club GVSU</h2>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+            <a href="https://www.instagram.com/gvsurealestate/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>
+              <img src={insta} alt="Instagram Logo" className="h-20 hover:transform hover:scale-110" />
+            </a>
+            <a href="https://www.linkedin.com/company/real-estate-club-at-gvsu" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>
+              <img src={linkedIn} alt="LinkedIn Logo" className="h-20 hover:transform hover:scale-110" />
+            </a>
+            <a href="https://www.tiktok.com/@gvsurealestateclub?lang=en" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>
+              <img src={tiktok} alt="TikTok Logo" className="h-20 hover:transform hover:scale-110" />
+            </a>
+          </div>
+        </footer>
       </div>
-
-      {/* Tabs */}
-      <Tabs />
-
-      {/* Main content */}
-      <div className="flex-grow flex justify-center">
-        <Routes>
-          <Route path="/" element={<Home adminAccess={adminAccess} />} />
-          <Route path="/announcements" element={<Announcements adminAccess={adminAccess} />} />
-          <Route path="/calendar" element={<Calendar adminAccess={adminAccess} />} />
-          <Route path="/about" element={<About adminAccess={adminAccess} />} />
-          <Route path="/login" element={<Login setAdminAccess={setAdminAccess} />} />
-          <Route path="/resources" element={<Resources adminAccess={adminAccess} />} />
-        </Routes>
-      </div>
-
-      {/* Footer */}
-      <footer className="w-full bg-dark-gray text-white py-4 text-center mt-auto">
-        <h2>@2024 by Real Estate Club GVSU</h2>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-          <a href="https://www.instagram.com/gvsurealestate/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>
-            <img src={insta} alt="Instagram Logo" className="h-20 hover:transform hover:scale-110" />
-          </a>
-          <a href="https://www.linkedin.com/company/real-estate-club-at-gvsu" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>
-            <img src={linkedIn} alt="LinkedIn Logo" className="h-20 hover:transform hover:scale-110" />
-          </a>
-          <a href="https://www.tiktok.com/@gvsurealestateclub?lang=en" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>
-            <img src={tiktok} alt="TikTok Logo" className="h-20 hover:transform hover:scale-110" />
-          </a>
-        </div>
-      </footer>
-    </div>
+    </Router>
   );
 }
 
@@ -98,10 +92,4 @@ function Tabs() {
   );
 }
 
-export default function RootApp() {
-  return (
-    <Router>
-      <App />
-    </Router>
-  );
-}
+export default App;

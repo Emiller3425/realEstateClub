@@ -22,7 +22,7 @@
     {
       "src": "/(.*)",
       "status": 404,
-      "dest": "/"
+      "dest": "web/build/index.html"
     }
   ]
 }

@@ -20,9 +20,8 @@
       "dest": "web/build/$1"
     },
     {
-      "src": "/[^.]+",
-      "dest": "/",
-      "status": 200
+      "src": "/.*",
+      "dest": "/index.html"
     }
   ]
 }

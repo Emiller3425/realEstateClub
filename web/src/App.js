@@ -83,11 +83,11 @@ function Tabs() {
 
   return (
     <div className="flex justify-between w-full overflow-x-auto">
-      <Link to="/" className={`w-full px-4 py-4 text-center ${getTabClass('/')}`}>Home</Link>
-      <Link to="/announcements" className={`w-full px-4 py-4 text-center ${getTabClass('/announcements')}`}>Announcements</Link>
-      <Link to="/calendar" className={`w-full px-4 py-4 text-center ${getTabClass('/calendar')}`}>Calendar</Link>
-      <Link to="/about" className={`w-full px-4 py-4 text-center ${getTabClass('/about')}`}>About</Link>
-      <Link to="/resources" className={`w-full px-4 py-4 text-center ${getTabClass('/resources')}`}>Resources</Link>
+      <Link to="/" className={`w-full px-4 py-2 md:py-4 text-center ${getTabClass('/')}`}>Home</Link>
+      <Link to="/announcements" className={`w-full px-4 py-2 md:py-4 text-center ${getTabClass('/announcements')}`}>Announcements</Link>
+      <Link to="/calendar" className={`w-full px-4 py-2 md:py-4 text-center ${getTabClass('/calendar')}`}>Calendar</Link>
+      <Link to="/about" className={`w-full px-4 py-2 md:py-4 text-center ${getTabClass('/about')}`}>About</Link>
+      <Link to="/resources" className={`w-full px-4 py-2 md:py-4 text-center ${getTabClass('/resources')}`}>Resources</Link>
     </div>
   );
 }

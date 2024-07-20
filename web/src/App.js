@@ -43,7 +43,7 @@ function App() {
         <Tabs />
 
         {/* Main content */}
-        <div className="flex-grow flex justify-center">
+        <div className="flex-grow flex justify-center w-full overflow-x-hidden">
           <Routes>
             <Route path="/" element={<Home adminAccess={adminAccess} />} />
             <Route path="/announcements" element={<Announcements adminAccess={adminAccess} />} />
@@ -57,15 +57,15 @@ function App() {
         {/* Footer */}
         <footer className="w-full bg-dark-gray text-white py-4 text-center mt-auto">
           <h2>@2024 by Real Estate Club GVSU</h2>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-            <a href="https://www.instagram.com/gvsurealestate/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>
-              <img src={insta} alt="Instagram Logo" className="h-20 hover:transform hover:scale-110" />
+          <div className="flex justify-center items-center gap-4 mt-4">
+            <a href="https://www.instagram.com/gvsurealestate/" target="_blank" rel="noopener noreferrer" className="transition-transform transform hover:scale-110">
+              <img src={insta} alt="Instagram Logo" className="h-10" />
             </a>
-            <a href="https://www.linkedin.com/company/real-estate-club-at-gvsu" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>
-              <img src={linkedIn} alt="LinkedIn Logo" className="h-20 hover:transform hover:scale-110" />
+            <a href="https://www.linkedin.com/company/real-estate-club-at-gvsu" target="_blank" rel="noopener noreferrer" className="transition-transform transform hover:scale-110">
+              <img src={linkedIn} alt="LinkedIn Logo" className="h-10" />
             </a>
-            <a href="https://www.tiktok.com/@gvsurealestateclub?lang=en" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', transition: 'transform 0.3s' }}>
-              <img src={tiktok} alt="TikTok Logo" className="h-20 hover:transform hover:scale-110" />
+            <a href="https://www.tiktok.com/@gvsurealestateclub?lang=en" target="_blank" rel="noopener noreferrer" className="transition-transform transform hover:scale-110">
+              <img src={tiktok} alt="TikTok Logo" className="h-10" />
             </a>
           </div>
         </footer>
@@ -82,7 +82,7 @@ function Tabs() {
   };
 
   return (
-    <div className="flex justify-between w-full">
+    <div className="flex justify-between w-full overflow-x-auto">
       <Link to="/" className={`w-full px-4 py-4 text-center ${getTabClass('/')}`}>Home</Link>
       <Link to="/announcements" className={`w-full px-4 py-4 text-center ${getTabClass('/announcements')}`}>Announcements</Link>
       <Link to="/calendar" className={`w-full px-4 py-4 text-center ${getTabClass('/calendar')}`}>Calendar</Link>

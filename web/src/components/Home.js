@@ -117,13 +117,14 @@ const Home = ({ adminAccess }) => {
     <div style={{ 
       fontFamily: 'Gill Sans, sans-serif', 
       textAlign: 'center', 
-      margin: '0 auto' 
+      margin: '0 auto',
+      width: '100%',
     }}>
       <div 
         style={{ 
           position: 'relative',
-          width: '100vw',
-          height: '100vh',
+          width: '100%',
+          height: '50vh',
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
@@ -178,7 +179,7 @@ const Home = ({ adminAccess }) => {
         )}
       </div>
       
-      <div className="bg-dark-gray text-white py-20">
+      <div className="bg-dark-gray text-white py-20 w-full px-4">
         {/* Next Meeting section */}
         {editMode ? (
           <input
@@ -199,14 +200,14 @@ const Home = ({ adminAccess }) => {
             onChange={handleChange}
             className="w-full p-2 text-black text-2xl"
             rows="4"
-            style={{ border: '1px solid #ccc', borderRadius: '4px', width: '60%', margin: '0 auto', textAlign: 'left'}}
+            style={{ border: '1px solid #ccc', borderRadius: '4px', width: '100%', textAlign: 'left'}}
           />
         ) : (
-          <p className="text-2xl" style={{ width: '60%', margin: '0 auto', textAlign: 'left' }}>{content.nextMeeting}</p>
+          <p className="text-2xl" style={{ width: '100%', textAlign: 'left' }}>{content.nextMeeting}</p>
         )}
       </div>
       
-      <section style={{ margin: '40px 0', padding: '20px' }}>
+      <section style={{ margin: '40px 0', padding: '20px' }} className="w-full px-4">
         {/* Mission section */}
         {editMode ? (
           <input
@@ -227,10 +228,10 @@ const Home = ({ adminAccess }) => {
             onChange={handleChange}
             className="w-full p-2"
             rows="4"
-            style={{ border: '1px solid #ccc', borderRadius: '4px', width: '60%', margin: '0 auto', textAlign: 'left'}}
+            style={{ border: '1px solid #ccc', borderRadius: '4px', width: '100%', textAlign: 'left'}}
           />
         ) : (
-          <p className="text-2xl" style={{ width: '60%', margin: '0 auto', textAlign: 'left' }}>{content.mission}</p>
+          <p className="text-2xl" style={{ width: '100%', textAlign: 'left' }}>{content.mission}</p>
         )}
       </section>
       

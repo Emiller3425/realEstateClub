@@ -117,14 +117,12 @@ const Home = ({ adminAccess }) => {
     <div style={{ 
       fontFamily: 'Gill Sans, sans-serif', 
       textAlign: 'center', 
-      margin: '0 auto',
-      maxWidth: '100vw',
-      overflowX: 'hidden'
+      margin: '0 auto' 
     }}>
       <div 
         style={{ 
           position: 'relative',
-          width: '100%',
+          width: '100vw',
           height: '100vh',
           overflow: 'hidden',
           display: 'flex',
@@ -201,10 +199,10 @@ const Home = ({ adminAccess }) => {
             onChange={handleChange}
             className="w-full p-2 text-black text-2xl"
             rows="4"
-            style={{ border: '1px solid #ccc', borderRadius: '4px', maxWidth: '600px', margin: '0 auto', textAlign: 'left'}}
+            style={{ border: '1px solid #ccc', borderRadius: '4px', width: '60%', margin: '0 auto', textAlign: 'left'}}
           />
         ) : (
-          <p className="text-2xl" style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'left' }}>{content.nextMeeting}</p>
+          <p className="text-2xl" style={{ width: '60%', margin: '0 auto', textAlign: 'left' }}>{content.nextMeeting}</p>
         )}
       </div>
       
@@ -229,10 +227,10 @@ const Home = ({ adminAccess }) => {
             onChange={handleChange}
             className="w-full p-2"
             rows="4"
-            style={{ border: '1px solid #ccc', borderRadius: '4px', maxWidth: '600px', margin: '0 auto', textAlign: 'left'}}
+            style={{ border: '1px solid #ccc', borderRadius: '4px', width: '60%', margin: '0 auto', textAlign: 'left'}}
           />
         ) : (
-          <p className="text-2xl" style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'left' }}>{content.mission}</p>
+          <p className="text-2xl" style={{ width: '60%', margin: '0 auto', textAlign: 'left' }}>{content.mission}</p>
         )}
       </section>
       

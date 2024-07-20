@@ -19,5 +19,6 @@
       "src": "/(.*)",
       "dest": "web/build/$1"
     }
-  ]
+  ],
+  "rewrites": [{ "src": "/(.*)", "dest": "web/build/$1" }]
 }

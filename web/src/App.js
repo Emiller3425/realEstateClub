@@ -43,7 +43,7 @@ function App() {
         <Tabs />
 
         {/* Main content */}
-        <div className="flex-grow flex justify-center w-full overflow-x-hidden">
+        <div className="flex-grow flex flex-wrap justify-center w-full">
           <Routes>
             <Route path="/" element={<Home adminAccess={adminAccess} />} />
             <Route path="/announcements" element={<Announcements adminAccess={adminAccess} />} />
@@ -82,12 +82,12 @@ function Tabs() {
   };
 
   return (
-    <div className="flex flex-wrap justify-between w-full overflow-x-auto md:flex-nowrap">
+    <div className="flex flex-wrap md:flex-nowrap justify-between w-full">
       <Link to="/" className={`w-full px-4 py-2 md:py-4 text-center ${getTabClass('/')}`}>Home</Link>
       <Link to="/announcements" className={`w-full px-4 py-2 md:py-4 text-center ${getTabClass('/announcements')}`}>Announcements</Link>
       <Link to="/calendar" className={`w-full px-4 py-2 md:py-4 text-center ${getTabClass('/calendar')}`}>Calendar</Link>
       <Link to="/about" className={`w-full px-4 py-2 md:py-4 text-center ${getTabClass('/about')}`}>About</Link>
-      <Link to="/resources" className={`w-full px-4 py-2 md:py-4 text-center md:w-auto ${getTabClass('/resources')}`}>Resources</Link>
+      <Link to="/resources" className={`w-full px-4 py-2 md:py-4 text-center ${getTabClass('/resources')}`}>Resources</Link>
     </div>
   );
 }

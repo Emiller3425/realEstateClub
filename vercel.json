@@ -18,11 +18,12 @@
     {
       "src": "/(.*)",
       "dest": "web/build/$1"
-    },
+    }
+  ],
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "status": 404,
-      "dest": "web/build/index.html"
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }

@@ -19,6 +19,14 @@
       "handle": "filesystem"
     },
     {
+      "src": "/static/(.*)",
+      "dest": "/web/build/static/$1"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/web/build/manifest.json"
+    },
+    {
       "src": "/(.*)",
       "dest": "/web/build/index.html"
     }

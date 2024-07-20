@@ -17,7 +17,7 @@
       },
       {
         "src": "/(.*)",
-        "dest": "web/build/index.html"
+        "dest": "web/build/$1"
       }
     ]
   }

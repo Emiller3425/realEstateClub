@@ -11,14 +11,18 @@ const port = process.env.PORT || 5001;
 
 // Enable CORS for the frontend origin
 app.use(cors({
-   origin: ['http://localhost:3000', 'https://realestateclubgvsu.com', 'https://real-estate-club.vercel.app'], // Allow your frontend origin
+    origin: ['http://localhost:3000', 'https://realestateclubgvsu.com', 'https://real-estate-club.vercel.app'], // Allow your frontend origin
 }));
 
-// Middleware to parse JSON requests
-app.use(bodyParser.json());
+// Middleware to parse JSON requests and set payload size limit
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Middleware to handle multipart/form-data
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+});
 
 // Prefix all routes with /api
 
@@ -125,11 +129,7 @@ app.delete('/api/delete-resource/:id', async (req, res) => {
     }
 });
 
-
-/**
- * POST /api/announcements
- * Fetch all documents from the 'announcements' collection in Firestore.
- */
+// Fetch all announcements
 app.post('/api/announcements', async (req, res) => {
     try {
         const announcementsRef = db.collection('announcements');
@@ -152,10 +152,7 @@ app.post('/api/announcements', async (req, res) => {
     }
 });
 
-/**
- * POST /api/new-announcement
- * Add a new announcement to the 'announcements' collection in Firestore.
- */
+// Add a new announcement
 app.post('/api/new-announcement', async (req, res) => {
     try {
         const { title, content } = req.body;
@@ -176,7 +173,7 @@ app.post('/api/new-announcement', async (req, res) => {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-            hour12: true, // Use 12-hour format with AM/PM
+            hour12: true,
         });
 
         const formattedTimestamp = `${formattedDate} ${formattedTime}`;
@@ -194,10 +191,7 @@ app.post('/api/new-announcement', async (req, res) => {
     }
 });
 
-/**
- * DELETE /api/delete-announcement/:id
- * Delete an announcement from the 'announcements' collection in Firestore.
- */
+// Delete an announcement
 app.delete('/api/delete-announcement/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -220,10 +214,7 @@ app.delete('/api/delete-announcement/:id', async (req, res) => {
     }
 });
 
-/**
- * POST /api/get-admin-password
- * Fetch the admin password from the 'userProfile' collection in Firestore.
- */
+// Fetch admin password
 app.post('/api/get-admin-password', async (req, res) => {
     try {
         const userProfileRef = db.collection('userProfile').doc('adminAccount');
@@ -242,10 +233,7 @@ app.post('/api/get-admin-password', async (req, res) => {
     }
 });
 
-/**
- * GET /api/home-content
- * Fetch the home content from the 'home' collection in Firestore.
- */
+// Fetch home content
 app.get('/api/home-content', async (req, res) => {
     try {
         const homeContentRef = db.collection('home').doc('homeContent');
@@ -278,10 +266,7 @@ app.get('/api/home-content', async (req, res) => {
     }
 });
 
-/**
- * POST /api/update-home-content
- * Update the home content in the 'home' collection in Firestore.
- */
+// Update home content
 app.post('/api/update-home-content', async (req, res) => {
     try {
         const { welcomeMessage, nextMeeting, mission } = req.body;
@@ -290,7 +275,7 @@ app.post('/api/update-home-content', async (req, res) => {
         const ourMissionRef = db.collection('home').doc('ourMission');
 
         await homeContentRef.set({
-            welcomeMessage, // Ensure welcomeMessage is being saved correctly
+            welcomeMessage,
             title: nextMeeting.title,
             content: nextMeeting.content
         }, { merge: true });
@@ -307,10 +292,7 @@ app.post('/api/update-home-content', async (req, res) => {
     }
 });
 
-/**
- * GET /api/about
- * Fetch all documents from the 'about' collection in Firestore.
- */
+// Fetch about content
 app.get('/api/about', async (req, res) => {
     try {
         const aboutRef = db.collection('about');
@@ -344,10 +326,7 @@ app.get('/api/about', async (req, res) => {
     }
 });
 
-/**
- * POST /api/update-about-title
- * Update the about title and content in Firestore.
- */
+// Update about title
 app.post('/api/update-about-title', async (req, res) => {
     try {
         const { title, content } = req.body;
@@ -362,10 +341,7 @@ app.post('/api/update-about-title', async (req, res) => {
     }
 });
 
-/**
- * POST /api/new-member
- * Add a new member profile to Firestore.
- */
+// Add a new member profile
 app.post('/api/new-member', upload.single('image'), async (req, res) => {
     try {
         const { name, title, email, description, order } = req.body;
@@ -403,7 +379,7 @@ app.post('/api/new-member', upload.single('image'), async (req, res) => {
                 email,
                 description,
                 image: imageUrl,
-                order: parseInt(order, 10) // Ensure order is saved as a number
+                order: parseInt(order, 10)
             });
 
             const newMember = {
@@ -426,10 +402,7 @@ app.post('/api/new-member', upload.single('image'), async (req, res) => {
     }
 });
 
-/**
- * DELETE /api/delete-member/:id
- * Delete a member profile from Firestore and its associated image from Firebase Storage.
- */
+// Delete a member profile
 app.delete('/api/delete-member/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -443,7 +416,7 @@ app.delete('/api/delete-member/:id', async (req, res) => {
 
         const memberData = memberDoc.data();
         const imageUrl = memberData.image;
-        const fileName = imageUrl.split('/').pop().split('?')[0]; // Extract file name from URL
+        const fileName = imageUrl.split('/').pop().split('?')[0];
 
         // Delete the Firestore document
         await memberRef.delete();
@@ -459,10 +432,7 @@ app.delete('/api/delete-member/:id', async (req, res) => {
     }
 });
 
-/**
- * POST /api/update-member
- * Update a member profile in Firestore.
- */
+// Update a member profile
 app.post('/api/update-member', upload.single('image'), async (req, res) => {
     try {
         const { id, name, title, email, description, order } = req.body;

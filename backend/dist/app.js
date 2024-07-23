@@ -443,6 +443,8 @@ app.post('/api/update-member', upload.single('image'), async (req, res) => {
             return;
         }
 
+        console.log('File size:', file.size);
+
         const memberRef = db.collection('about').doc(id);
         const memberData = { name, title, email, description, order: parseInt(order, 10) };
 

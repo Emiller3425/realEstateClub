@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 const Login = ({ setAdminAccess }) => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const API_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:5001/api' 
@@ -26,13 +27,16 @@ const Login = ({ setAdminAccess }) => {
       const data = await response.json();
       if (password !== data.password) {
         setErrorMessage('Incorrect password');
+        setSuccessMessage('');
       } else {
         setErrorMessage('');
+        setSuccessMessage('Admin Access Granted');
         setAdminAccess(true);
       }
     } catch (error) {
       console.error('Error verifying password:', error);
       setErrorMessage('Internal error');
+      setSuccessMessage('');
     }
   };
 
@@ -60,6 +64,11 @@ const Login = ({ setAdminAccess }) => {
       {errorMessage && (
         <div className="mt-4 text-red-500">
           {errorMessage}
+        </div>
+      )}
+      {successMessage && (
+        <div className="mt-4 text-green-500">
+          {successMessage}
         </div>
       )}
     </div>

@@ -17,6 +17,11 @@ import Resources from './components/Resources';
 function App() {
   const [adminAccess, setAdminAccess] = useState(false);
 
+  const handleLogout = () => {
+    setAdminAccess(false);
+    window.location.reload(); // Reloads the page
+  };
+
   return (
     <Router basename="/">
       <div style={{ fontFamily: 'Gill Sans, sans-serif' }} className="flex flex-col min-h-screen">
@@ -30,7 +35,7 @@ function App() {
           <div className="mr-4">
             {/* Login button */}
             {adminAccess ? (
-              <button className="bg-white text-navy py-2 px-4 rounded-lg btn">
+              <button className="bg-white text-navy py-2 px-4 rounded-lg btn" onClick={handleLogout}>
                 Logout
               </button>
             ) : (

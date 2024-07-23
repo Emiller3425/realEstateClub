@@ -4,7 +4,6 @@ const Login = ({ setAdminAccess }) => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const API_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:5001/api' 
@@ -33,7 +32,6 @@ const Login = ({ setAdminAccess }) => {
         setErrorMessage('');
         setSuccessMessage('Admin Access Granted');
         setAdminAccess(true);
-        setIsLoggedIn(true);
       }
     } catch (error) {
       console.error('Error verifying password:', error);
@@ -42,55 +40,36 @@ const Login = ({ setAdminAccess }) => {
     }
   };
 
-  const handleLogout = () => {
-    setAdminAccess(false);
-    window.location.reload(); // Refresh the page
-  };
-
   return (
     <div className="flex flex-col justify-center items-center min-h-screen w-full bg-dark-gray text-white">
-      {isLoggedIn ? (
-        <div className="flex flex-col items-center">
-          <h1 className="text-2xl mb-8">Admin Access Granted</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-white text-navy py-2 px-4 rounded-lg"
-          >
-            Logout
-          </button>
+      <h1 className="text-2xl mb-8">To gain admin access, please enter password</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col items-center w-full max-w-sm">
+        <div className="relative w-full">
+          <input
+            type="password"
+            value={password}
+            onChange={handleChange}
+            className="mb-4 p-2 rounded w-full border border-white"
+            placeholder="Enter Password"
+            style={{ color: 'black' }}
+          />
         </div>
-      ) : (
-        <>
-          <h1 className="text-2xl mb-8">To gain admin access, please enter password</h1>
-          <form onSubmit={handleSubmit} className="flex flex-col items-center w-full max-w-sm">
-            <div className="relative w-full">
-              <input
-                type="password"
-                value={password}
-                onChange={handleChange}
-                className="mb-4 p-2 rounded w-full border border-white"
-                placeholder="Enter Password"
-                style={{ color: 'black' }}
-              />
-            </div>
-            <button
-              type="submit"
-              className="bg-white text-navy py-2 px-4 rounded-lg"
-            >
-              Submit
-            </button>
-          </form>
-          {errorMessage && (
-            <div className="mt-4 text-red-500">
-              {errorMessage}
-            </div>
-          )}
-          {successMessage && (
-            <div className="mt-4 text-green-500">
-              {successMessage}
-            </div>
-          )}
-        </>
+        <button
+          type="submit"
+          className="bg-white text-navy py-2 px-4 rounded-lg"
+        >
+          Submit
+        </button>
+      </form>
+      {errorMessage && (
+        <div className="mt-4 text-red-500">
+          {errorMessage}
+        </div>
+      )}
+      {successMessage && (
+        <div className="mt-4 text-green-500">
+          {successMessage}
+        </div>
       )}
     </div>
   );

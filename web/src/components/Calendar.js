@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BeatLoader } from 'react-spinners'; // Import BeatLoader from react-spinners
 
 const Calendar = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -6,7 +7,9 @@ const Calendar = () => {
   return (
     <div style={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
       {!isLoaded && (
-        <div style={{ position: 'absolute' }}>Loading...</div>
+        <div style={{ position: 'absolute', zIndex: 10 }}>
+          <BeatLoader color="#004B80" loading={!isLoaded} size={15} /> {/* Show loader */}
+        </div>
       )}
       <iframe
         title="Real Estate Club Calendar"

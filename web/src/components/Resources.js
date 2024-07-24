@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import BeatLoader from 'react-spinners/BeatLoader';
 
 const Resources = ({ adminAccess }) => {
   const [resources, setResources] = useState([]);
@@ -8,6 +9,7 @@ const Resources = ({ adminAccess }) => {
     file: null,
   });
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   const API_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:5001/api' 
@@ -18,6 +20,7 @@ const Resources = ({ adminAccess }) => {
   useEffect(() => {
     const fetchResources = async () => {
       try {
+        setLoading(true); // Set loading to true
         const response = await fetch(`${API_URL}/resources`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -26,6 +29,8 @@ const Resources = ({ adminAccess }) => {
         setResources(data);
       } catch (error) {
         console.error('Error fetching resources:', error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
@@ -39,7 +44,6 @@ const Resources = ({ adminAccess }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      console.log('File selected:', file); // Log file details for debugging
       handleNewResourceChange('file', file);
     }
   };
@@ -50,8 +54,6 @@ const Resources = ({ adminAccess }) => {
       formData.append('name', newResource.name);
       formData.append('description', newResource.description);
       formData.append('file', newResource.file);
-
-      console.log('New resource to be added:', newResource); // Log newResource details for debugging
 
       const response = await fetch(`${API_URL}/new-resource`, {
         method: 'POST',
@@ -89,6 +91,14 @@ const Resources = ({ adminAccess }) => {
       console.error('Error deleting resource:', error);
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <BeatLoader color="#004B80" />
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '40px', fontFamily: 'Gill Sans, sans-serif', margin: '0 auto', width: '75%' }}>

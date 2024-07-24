@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import BeatLoader from 'react-spinners/BeatLoader';
 
 const About = ({ adminAccess }) => {
   const [editMode, setEditMode] = useState(false);
@@ -13,6 +14,7 @@ const About = ({ adminAccess }) => {
     image: null,
     order: 0,
   });
+  const [loading, setLoading] = useState(true); // Add loading state
 
   const API_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:5001/api' 
@@ -23,6 +25,7 @@ const About = ({ adminAccess }) => {
   useEffect(() => {
     const fetchMembersContent = async () => {
       try {
+        setLoading(true); // Set loading to true
         const response = await fetch(`${API_URL}/about`);
         const data = await response.json();
         setTitle(data.title);
@@ -30,6 +33,8 @@ const About = ({ adminAccess }) => {
         setMembersContent(data.members.sort((a, b) => a.order - b.order));
       } catch (error) {
         console.error('Error fetching members content:', error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
@@ -176,8 +181,16 @@ const About = ({ adminAccess }) => {
     await updateMember(swapIndex);
   };
 
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <BeatLoader color="#004B80" />
+      </div>
+    );
+  }
+
   return (
-    <div style={{ padding: '40px',fontFamily: 'Gill Sans, sans-serif', margin: '0 auto', width: '75%' }}>
+    <div style={{ padding: '40px', fontFamily: 'Gill Sans, sans-serif', margin: '0 auto', width: '75%' }}>
       {editMode ? (
         <>
           <input

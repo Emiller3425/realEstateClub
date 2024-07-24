@@ -12,6 +12,7 @@ import victory from '../images/victory.jpeg';
 import devTour2 from '../images/devTour2.jpg';
 import devTourFunny from '../images/devTourFunny.jpg';
 import gr from '../images/GR.jpg.webp';
+import BeatLoader from 'react-spinners/BeatLoader';
 
 // Function to shuffle the array
 const shuffle = (array) => {
@@ -25,6 +26,7 @@ const shuffle = (array) => {
 const Home = ({ adminAccess }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track the current image index in the slideshow
   const [editMode, setEditMode] = useState(false); // State to track whether edit mode is enabled
+  const [loading, setLoading] = useState(true); // Add loading state
   const [content, setContent] = useState({
     welcomeMessage: '',
     nextMeetingTitle: '',
@@ -64,6 +66,8 @@ const Home = ({ adminAccess }) => {
         } else {
           console.error('Error fetching content:', error);
         }
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
@@ -113,6 +117,14 @@ const Home = ({ adminAccess }) => {
     }
   };
 
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <BeatLoader color="#004B80" />
+      </div>
+    );
+  }
+
   return (
     <div style={{ 
       fontFamily: 'Gill Sans, sans-serif', 
@@ -157,7 +169,7 @@ const Home = ({ adminAccess }) => {
             left: '0',
             width: '100%',
             height: '100%',
-            backgroundColor: 'rgba(0, 43, 128, 0.15)', // navy color with 15% opacity
+            backgroundColor: 'rgba(0, 0, 0, 0.30)', // navy color with 15% opacity
             zIndex: '0'
           }}
         />
@@ -261,7 +273,7 @@ const Home = ({ adminAccess }) => {
           margin: '40px auto',
           whiteSpace: 'nowrap'
         }}
-        className="hover:transform hover:scale-110 text-white font-bold py-2 px-4 mb-4"
+        className="hover:transform hover:scale-105 text-white font-bold py-2 px-4 mb-4"
       >
         Contact Us
       </a>

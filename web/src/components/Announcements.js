@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Editor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js';
 import 'draft-js/dist/Draft.css';
+import BeatLoader from 'react-spinners/BeatLoader';
 
 const INLINE_STYLES = [
   { label: 'Bold', style: 'BOLD' },
@@ -48,6 +49,8 @@ export default function Announcements({ adminAccess }) {
   const [showEditor, setShowEditor] = useState(false);
   const [title, setTitle] = useState('');
   const editorRef = useRef(null);
+  const [loading, setLoading] = useState(true); // Add loading state
+
 
   const API_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:5001/api' 
@@ -57,6 +60,7 @@ export default function Announcements({ adminAccess }) {
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
+      setLoading(true); // Set loading to true
       try {
         const response = await fetch(`${API_URL}/announcements`, {
           method: 'POST',
@@ -74,6 +78,8 @@ export default function Announcements({ adminAccess }) {
         setAnnouncements(data);
       } catch (error) {
         console.error('Error fetching announcements:', error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
@@ -171,6 +177,14 @@ export default function Announcements({ adminAccess }) {
       console.error('Error deleting announcement:', error);
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <BeatLoader color="#004B80" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4">

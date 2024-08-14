@@ -95,7 +95,7 @@ const Resources = ({ adminAccess }) => {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <BeatLoader color="#004B80" />
+        <BeatLoader color="#008cf0" />
       </div>
     );
   }

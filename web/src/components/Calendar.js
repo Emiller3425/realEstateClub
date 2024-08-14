@@ -8,7 +8,7 @@ const Calendar = () => {
     <div style={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
       {!isLoaded && (
         <div style={{ position: 'absolute', zIndex: 10 }}>
-          <BeatLoader color="#004B80" loading={!isLoaded} size={15} /> {/* Show loader */}
+          <BeatLoader color="#008cf0" loading={!isLoaded} size={15} /> {/* Show loader */}
         </div>
       )}
       <iframe

@@ -36,12 +36,12 @@
 
 .bg-blue-500 {
   --tw-bg-opacity: 1;
-  background-color: rgb(59 130 246 / var(--tw-bg-opacity));
+  background-color: rgb(0 160 256 / var(--tw-bg-opacity));
 }
 
 .bg-blue-900 {
   --tw-bg-opacity: 1;
-  background-color: rgb(30 58 138 / var(--tw-bg-opacity));
+  background-color: rgb(0 160 256 / var(--tw-bg-opacity));
 }
 
 .bg-gray-500 {
@@ -75,12 +75,12 @@
 
 .hover\:bg-blue-600:hover {
   --tw-bg-opacity: 1;
-  background-color: rgb(37 99 235 / var(--tw-bg-opacity));
+  background-color: rgb(0 160 256 / var(--tw-bg-opacity));
 }
 
 .bg-navy {
   --tw-bg-opacity: 1;
-  background-color: rgb(0 75 128 / var(--tw-bg-opacity)); /* Navy color */
+  background-color: rgb(0 160 256 / var(--tw-bg-opacity)); /* Navy color */
 }
 
 .bg-dark-gray {
@@ -91,5 +91,5 @@
 /* Custom navy text color */
 .text-navy {
   --tw-text-opacity: 1;
-  color: rgb(0 75 128 / var(--tw-text-opacity)); /* Navy color */
+  color: rgb(0 160 256 / var(--tw-text-opacity)); /* Navy color */
 }

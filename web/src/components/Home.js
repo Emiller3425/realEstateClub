@@ -262,7 +262,7 @@ const Home = ({ adminAccess }) => {
         style={{
           display: 'inline-block',
           padding: '10px 20px',
-          backgroundColor: '#004B80',
+          backgroundColor: '#008cf0',
           color: '#fff',
           textDecoration: 'none',
           border: 'none',

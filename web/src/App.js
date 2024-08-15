@@ -29,7 +29,7 @@ function App() {
         <div className="header-container bg-dark-gray text-white py-4 flex justify-between items-center">
           <div className="flex items-center">
             <Link to="/">
-              <img src={realEstateLogo} alt="Real Estate Logo" className="h-20 mr-2" />
+              <img src={realEstateLogo} alt="Real Estate Logo" className="h-16 mr-2" />
             </Link>
           </div>
           <div className="mr-4">

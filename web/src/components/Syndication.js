@@ -222,7 +222,7 @@ const Syndication = ({ adminAccess }) => {
               <p>{doc.description}</p>
             </div>
             <div className="flex space-x-2">
-              <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="bg-navy text-white py-2 px-4 rounded-lg">Download</a>
+              <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="bg-navy text-white py-2 px-4 rounded-lg">Preview</a>
               {adminAccess && (
                 <button onClick={() => handleDeleteDocument(doc.id)} className="bg-red-500 text-white py-2 px-4 rounded-lg">Delete</button>
               )}

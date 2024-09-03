@@ -159,10 +159,10 @@ export default function Announcements({ adminAccess }) {
   
       const data = await response.json();
       setAnnouncements(data);
-  
       setEditorState(initialEditorState);
       setShowEditor(false);
       setTitle(''); // Reset title after posting
+      alert('Posted New announcement successfully');
     } catch (error) {
       console.error('Error posting announcement:', error);
     }
@@ -183,6 +183,7 @@ export default function Announcements({ adminAccess }) {
 
       // Remove the deleted announcement from the state
       setAnnouncements((prevAnnouncements) => prevAnnouncements.filter((announcement) => announcement.id !== id));
+      alert('Deleted new announcement successfully');
     } catch (error) {
       console.error('Error deleting announcement:', error);
     }

@@ -71,6 +71,7 @@ const Resources = ({ adminAccess }) => {
         description: '',
         file: null,
       });
+      alert('Added new resource successfully');
     } catch (error) {
       console.error('Error adding new resource:', error);
     }
@@ -87,6 +88,7 @@ const Resources = ({ adminAccess }) => {
       }
 
       setResources(resources.filter((resource) => resource.id !== id));
+      alert('Deleted new resource successfully');
     } catch (error) {
       console.error('Error deleting resource:', error);
     }

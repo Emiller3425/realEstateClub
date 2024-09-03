@@ -112,6 +112,7 @@ const Home = ({ adminAccess }) => {
       }
 
       setEditMode(false); // Exit edit mode after saving
+      alert('Updated successfully');
     } catch (error) {
       console.error('Error updating content:', error);
     }

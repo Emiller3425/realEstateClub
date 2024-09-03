@@ -93,6 +93,7 @@ const About = ({ adminAccess }) => {
         image: null,
         order: 0,
       });
+      alert('Added new member successfully');
     } catch (error) {
       console.error('Error adding new member:', error);
     }
@@ -109,6 +110,7 @@ const About = ({ adminAccess }) => {
       }
 
       setMembersContent(membersContent.filter((member) => member.id !== id));
+      alert('deleted new member successfully');
     } catch (error) {
       console.error('Error deleting member:', error);
     }
@@ -139,6 +141,7 @@ const About = ({ adminAccess }) => {
       }
 
       setEditMode(false);
+      alert('Member updated successfully');
     } catch (error) {
       console.error('Error updating member:', error);
     }

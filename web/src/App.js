@@ -55,11 +55,11 @@ function App() {
           <Routes>
             <Route path="/" element={<Home adminAccess={adminAccess} />} />
             <Route path="/announcements" element={<Announcements adminAccess={adminAccess} />} />
+            <Route path="/syndication" element={<Syndication adminAccess={adminAccess} />} />
             <Route path="/calendar" element={<Calendar adminAccess={adminAccess} />} />
             <Route path="/about" element={<About adminAccess={adminAccess} />} />
             <Route path="/login" element={<Login setAdminAccess={setAdminAccess} />} />
             <Route path="/resources" element={<Resources adminAccess={adminAccess} />} />
-            <Route path="/syndication" element={<Syndication adminAccess={adminAccess} />} />
           </Routes>
         </div>
 
@@ -94,10 +94,10 @@ function Tabs() {
     <div className="flex flex-wrap md:flex-nowrap w-full overflow-x-auto no-scrollbar">
       <Link to="/" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/')}`}>Home</Link>
       <Link to="/announcements" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/announcements')}`}>Announcements</Link>
+      <Link to="/syndication" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/syndication')}`}>Syndication Project</Link>
       <Link to="/calendar" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/calendar')}`}>Calendar</Link>
       <Link to="/about" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/about')}`}>About</Link>
       <Link to="/resources" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/resources')}`}>Resources</Link>
-      <Link to="/syndication" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/syndication')}`}>Syndication Project</Link>
     </div>
   );
 }

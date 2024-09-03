@@ -57,7 +57,7 @@ function App() {
             <Route path="/announcements" element={<Announcements adminAccess={adminAccess} />} />
             <Route path="/syndication" element={<Syndication adminAccess={adminAccess} />} />
             <Route path="/calendar" element={<Calendar adminAccess={adminAccess} />} />
-            <Route path="/about" element={<About adminAccess={adminAccess} />} />
+            <Route path="/leadership" element={<About adminAccess={adminAccess} />} />
             <Route path="/login" element={<Login setAdminAccess={setAdminAccess} />} />
             <Route path="/resources" element={<Resources adminAccess={adminAccess} />} />
           </Routes>
@@ -96,7 +96,7 @@ function Tabs() {
       <Link to="/announcements" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/announcements')}`}>Announcements</Link>
       <Link to="/syndication" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/syndication')}`}>Syndication Project</Link>
       <Link to="/calendar" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/calendar')}`}>Calendar</Link>
-      <Link to="/about" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/about')}`}>About</Link>
+      <Link to="/leadership" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/leadership')}`}>Leadership</Link>
       <Link to="/resources" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/resources')}`}>Resources</Link>
     </div>
   );

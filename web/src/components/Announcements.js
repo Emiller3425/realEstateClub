@@ -132,6 +132,15 @@ export default function Announcements({ adminAccess }) {
 
   const handlePostAnnouncement = async () => {
     try {
+      // Get the current date and time
+      const currentTime = new Date();
+      
+      // Subtract 4 hours from the current time
+      currentTime.setHours(currentTime.getHours() - 4);
+      
+      // Format the time to ISO string or another format your API expects
+      const timestamp = currentTime.toISOString(); // Adjust if necessary
+  
       const response = await fetch(`${API_URL}/new-announcement`, {
         method: 'POST',
         headers: {
@@ -140,16 +149,17 @@ export default function Announcements({ adminAccess }) {
         body: JSON.stringify({
           title: title,
           content: editorState.getCurrentContent().getPlainText(),
+          timestamp: timestamp, // Include the adjusted timestamp
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-
+  
       const data = await response.json();
       setAnnouncements(data);
-
+  
       setEditorState(initialEditorState);
       setShowEditor(false);
       setTitle(''); // Reset title after posting

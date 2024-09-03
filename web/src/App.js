@@ -13,6 +13,7 @@ import Calendar from './components/Calendar';
 import About from './components/About';
 import Login from './components/Login';
 import Resources from './components/Resources';
+import Syndication from './components/Syndication';
 
 function App() {
   const [adminAccess, setAdminAccess] = useState(false);
@@ -58,6 +59,7 @@ function App() {
             <Route path="/about" element={<About adminAccess={adminAccess} />} />
             <Route path="/login" element={<Login setAdminAccess={setAdminAccess} />} />
             <Route path="/resources" element={<Resources adminAccess={adminAccess} />} />
+            <Route path="/syndication" element={<Syndication adminAccess={adminAccess} />} />
           </Routes>
         </div>
 
@@ -95,6 +97,7 @@ function Tabs() {
       <Link to="/calendar" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/calendar')}`}>Calendar</Link>
       <Link to="/about" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/about')}`}>About</Link>
       <Link to="/resources" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/resources')}`}>Resources</Link>
+      <Link to="/syndication" className={`flex-1 px-4 py-2 md:py-4 text-center ${getTabClass('/syndication')}`}>Syndication Project</Link>
     </div>
   );
 }

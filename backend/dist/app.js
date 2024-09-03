@@ -22,6 +22,269 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // Prefix all routes with /api
 
+// Syndication API Endpoints
+
+// Syndication API Endpoints
+
+// Fetch Overview
+app.get('/api/syndication/overview', async (req, res) => {
+    try {
+        const overviewRef = db.collection('syndication_overview').doc('overview');
+        const doc = await overviewRef.get();
+
+        if (!doc.exists) {
+            res.json({ text: '' }); // Return empty text if overview does not exist
+            return;
+        }
+
+        const overview = doc.data();
+        res.json(overview);
+    } catch (error) {
+        console.error('Error fetching overview:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+// Update Overview
+app.post('/api/syndication/overview', async (req, res) => {
+    try {
+        const { text } = req.body;
+
+        if (!text) {
+            res.status(400).json({ error: 'Text is required' });
+            return;
+        }
+
+        const overviewRef = db.collection('syndication_overview').doc('overview');
+        await overviewRef.set({ text }, { merge: true });
+
+        res.status(200).json({ message: 'Overview updated successfully' });
+    } catch (error) {
+        console.error('Error updating overview:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+// Fetch Documents
+app.get('/api/syndication/documents', async (req, res) => {
+    try {
+        const documentsRef = db.collection('syndication_documents');
+        const snapshot = await documentsRef.orderBy('timestamp', 'asc').get();
+
+        const documents = [];
+        snapshot.forEach(doc => {
+            documents.push({ id: doc.id, ...doc.data() });
+        });
+
+        res.json(documents); // Always return the documents array, even if empty
+    } catch (error) {
+        console.error('Error fetching documents:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+// Add or Update Document
+app.post('/api/syndication/documents', upload.single('file'), async (req, res) => {
+    try {
+        const { id, name, description } = req.body;
+        const file = req.file;
+        const timestamp = new Date();
+
+        if (!name || !description) {
+            res.status(400).json({ error: 'Name and description are required' });
+            return;
+        }
+
+        let fileUrl = '';
+
+        if (file) {
+            const blob = bucket.file(`syndication_documents/${file.originalname}`);
+            const blobStream = blob.createWriteStream({
+                metadata: {
+                    contentType: file.mimetype
+                }
+            });
+
+            blobStream.on('error', (err) => {
+                console.error('Error uploading file:', err);
+                res.status(500).json({ error: "Internal Error" });
+            });
+
+            blobStream.on('finish', async () => {
+                fileUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+                await blob.makePublic();
+
+                const documentData = {
+                    name,
+                    description,
+                    fileUrl,
+                    timestamp
+                };
+
+                const docRef = id ? db.collection('syndication_documents').doc(id) : db.collection('syndication_documents').doc();
+                await docRef.set(documentData, { merge: true });
+
+                res.status(200).json({ message: 'Document added or updated successfully' });
+            });
+
+            blobStream.end(file.buffer);
+        } else if (id) {
+            await db.collection('syndication_documents').doc(id).set({
+                name,
+                description,
+                timestamp
+            }, { merge: true });
+            res.status(200).json({ message: 'Document updated successfully' });
+        } else {
+            res.status(400).json({ error: 'File is required for new documents' });
+        }
+    } catch (error) {
+        console.error('Error adding or updating document:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+// Delete Document
+app.delete('/api/syndication/documents/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const docRef = db.collection('syndication_documents').doc(id);
+        const doc = await docRef.get();
+
+        if (!doc.exists) {
+            res.status(404).json({ error: 'Document not found' });
+            return;
+        }
+
+        const documentData = doc.data();
+        const fileUrl = documentData.fileUrl;
+
+        // Check if fileUrl is properly formatted and exists
+        if (!fileUrl) {
+            res.status(404).json({ error: 'File URL not found in document data' });
+            return;
+        }
+
+        // Extract the correct file name from the fileUrl
+        const fileName = fileUrl.split('/').pop(); // Ensures we only get the file name
+
+        // Delete the Firestore document first
+        await docRef.delete();
+
+        // Delete the associated file from Firebase Storage
+        const file = bucket.file(`syndication_documents/${fileName}`);
+        await file.delete();
+
+        res.status(200).json({ message: 'Document deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting document:', error.message);
+        res.status(500).json({ error: "Internal Error - Delete document failed" });
+    }
+});
+
+// Fetch Read-throughs
+app.get('/api/syndication/read-throughs', async (req, res) => {
+    try {
+        const readThroughsRef = db.collection('syndication_read-throughs');
+        const snapshot = await readThroughsRef.get();
+
+        const readThroughs = [];
+        snapshot.forEach(doc => {
+            readThroughs.push({ id: doc.id, ...doc.data() });
+        });
+
+        res.json(readThroughs); // Always return the readThroughs array, even if empty
+    } catch (error) {
+        console.error('Error fetching read-throughs:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+// Add or Update Read-through
+app.post('/api/syndication/read-throughs', async (req, res) => {
+    try {
+        const { id, title, url } = req.body;
+
+        if (!title || !url) {
+            res.status(400).json({ error: 'Title and URL are required' });
+            return;
+        }
+
+        const docRef = id ? db.collection('syndication_read-throughs').doc(id) : db.collection('syndication_read-throughs').doc();
+        await docRef.set({ title, url }, { merge: true });
+
+        res.status(200).json({ message: 'Read-through added or updated successfully' });
+    } catch (error) {
+        console.error('Error adding or updating read-through:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+// Delete Read-through
+app.delete('/api/syndication/read-throughs/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const docRef = db.collection('syndication_read-throughs').doc(id);
+        await docRef.delete();
+
+        res.status(200).json({ message: 'Read-through deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting read-through:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+app.get('/api/syndication/watch-throughs', async (req, res) => {
+    try {
+        const watchThroughsRef = db.collection('syndication_watch-throughs');
+        const snapshot = await watchThroughsRef.get();
+
+        const watchThroughs = [];
+        snapshot.forEach(doc => {
+            watchThroughs.push({ id: doc.id, ...doc.data() });
+        });
+
+        res.json(watchThroughs); // Always return the watchThroughs array, even if empty
+    } catch (error) {
+        console.error('Error fetching watch-throughs:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+// Add or Update Watch-through
+app.post('/api/syndication/watch-throughs', async (req, res) => {
+    try {
+        const { id, title, url } = req.body;
+
+        if (!title || !url) {
+            res.status(400).json({ error: 'Title and URL are required' });
+            return;
+        }
+
+        const docRef = id ? db.collection('syndication_watch-throughs').doc(id) : db.collection('syndication_watch-throughs').doc();
+        await docRef.set({ title, url }, { merge: true });
+
+        res.status(200).json({ message: 'Watch-through added or updated successfully' });
+    } catch (error) {
+        console.error('Error adding or updating watch-through:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
+// Delete Watch-through
+app.delete('/api/syndication/watch-throughs/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const docRef = db.collection('syndication_watch-throughs').doc(id);
+        await docRef.delete();
+
+        res.status(200).json({ message: 'Watch-through deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting watch-through:', error);
+        res.status(500).json({ error: "Internal Error" });
+    }
+});
+
 // Fetch all resources
 app.get('/api/resources', async (req, res) => {
     try {

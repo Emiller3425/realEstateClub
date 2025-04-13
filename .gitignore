@@ -29,3 +29,5 @@ yarn-error.log*
 
 config/serviceAccountKey.json
 .vercel
+
+backend/.env

@@ -1,42 +1,60 @@
 "use strict";
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const { db, bucket } = require('./firebaseconfig');
 const cors = require('cors');
 const multer = require('multer');
+const nodemailer = require('nodemailer');
+require('dotenv').config();
+const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 5001;
 
-// Enable CORS for the frontend origin
 app.use(cors({
-   origin: ['http://localhost:3000', 'https://realestateclubgvsu.com', 'https://real-estate-club.vercel.app'], // Allow your frontend origin
+   origin: ['http://localhost:3000', 'https://realestateclubgvsu.com', 'https://real-estate-club.vercel.app'],
 }));
 
-// Middleware to parse JSON requests
 app.use(bodyParser.json());
 
-// Middleware to handle multipart/form-data
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Prefix all routes with /api
+let transporter;
+if (process.env.GMAIL_EMAIL && process.env.GMAIL_APP_PASSWORD) {
+    transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+            user: process.env.GMAIL_EMAIL,
+            pass: process.env.GMAIL_APP_PASSWORD
+        },
+        tls: {
+            // rejectUnauthorized: false
+        }
+    });
 
-// Syndication API Endpoints
+    transporter.verify((error, success) => {
+        if (error) {
+            console.error('Error verifying email transporter:', error);
+            console.warn('Email notifications for announcements may fail. Check .env variables and Gmail App Password setup.');
+        } else {
+            console.log('Email transporter is ready to send messages');
+        }
+    });
+} else {
+    console.warn('GMAIL_EMAIL or GMAIL_APP_PASSWORD not found in .env file. Email notifications will be disabled.');
+    transporter = null;
+}
 
-// Syndication API Endpoints
-
-// Fetch Overview
 app.get('/api/syndication/overview', async (req, res) => {
     try {
         const overviewRef = db.collection('syndication_overview').doc('overview');
         const doc = await overviewRef.get();
-
         if (!doc.exists) {
-            res.json({ text: '' }); // Return empty text if overview does not exist
+            res.json({ text: '' });
             return;
         }
-
         const overview = doc.data();
         res.json(overview);
     } catch (error) {
@@ -45,19 +63,15 @@ app.get('/api/syndication/overview', async (req, res) => {
     }
 });
 
-// Update Overview
 app.post('/api/syndication/overview', async (req, res) => {
     try {
         const { text } = req.body;
-
         if (!text) {
             res.status(400).json({ error: 'Text is required' });
             return;
         }
-
         const overviewRef = db.collection('syndication_overview').doc('overview');
         await overviewRef.set({ text }, { merge: true });
-
         res.status(200).json({ message: 'Overview updated successfully' });
     } catch (error) {
         console.error('Error updating overview:', error);
@@ -65,75 +79,51 @@ app.post('/api/syndication/overview', async (req, res) => {
     }
 });
 
-// Fetch Documents
 app.get('/api/syndication/documents', async (req, res) => {
     try {
         const documentsRef = db.collection('syndication_documents');
         const snapshot = await documentsRef.orderBy('timestamp', 'asc').get();
-
         const documents = [];
         snapshot.forEach(doc => {
             documents.push({ id: doc.id, ...doc.data() });
         });
-
-        res.json(documents); // Always return the documents array, even if empty
+        res.json(documents);
     } catch (error) {
         console.error('Error fetching documents:', error);
         res.status(500).json({ error: "Internal Error" });
     }
 });
 
-// Add or Update Document
 app.post('/api/syndication/documents', upload.single('file'), async (req, res) => {
     try {
         const { id, name, description } = req.body;
         const file = req.file;
         const timestamp = new Date();
-
         if (!name || !description) {
             res.status(400).json({ error: 'Name and description are required' });
             return;
         }
-
         let fileUrl = '';
-
         if (file) {
             const blob = bucket.file(`syndication_documents/${file.originalname}`);
             const blobStream = blob.createWriteStream({
-                metadata: {
-                    contentType: file.mimetype
-                }
+                metadata: { contentType: file.mimetype }
             });
-
             blobStream.on('error', (err) => {
                 console.error('Error uploading file:', err);
                 res.status(500).json({ error: "Internal Error" });
             });
-
             blobStream.on('finish', async () => {
                 fileUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
                 await blob.makePublic();
-
-                const documentData = {
-                    name,
-                    description,
-                    fileUrl,
-                    timestamp
-                };
-
+                const documentData = { name, description, fileUrl, timestamp };
                 const docRef = id ? db.collection('syndication_documents').doc(id) : db.collection('syndication_documents').doc();
                 await docRef.set(documentData, { merge: true });
-
                 res.status(200).json({ message: 'Document added or updated successfully' });
             });
-
             blobStream.end(file.buffer);
         } else if (id) {
-            await db.collection('syndication_documents').doc(id).set({
-                name,
-                description,
-                timestamp
-            }, { merge: true });
+            await db.collection('syndication_documents').doc(id).set({ name, description, timestamp }, { merge: true });
             res.status(200).json({ message: 'Document updated successfully' });
         } else {
             res.status(400).json({ error: 'File is required for new documents' });
@@ -144,37 +134,25 @@ app.post('/api/syndication/documents', upload.single('file'), async (req, res) =
     }
 });
 
-// Delete Document
 app.delete('/api/syndication/documents/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const docRef = db.collection('syndication_documents').doc(id);
         const doc = await docRef.get();
-
         if (!doc.exists) {
             res.status(404).json({ error: 'Document not found' });
             return;
         }
-
         const documentData = doc.data();
         const fileUrl = documentData.fileUrl;
-
-        // Check if fileUrl is properly formatted and exists
         if (!fileUrl) {
             res.status(404).json({ error: 'File URL not found in document data' });
             return;
         }
-
-        // Extract the correct file name from the fileUrl
-        const fileName = fileUrl.split('/').pop(); // Ensures we only get the file name
-
-        // Delete the Firestore document first
+        const fileName = fileUrl.split('/').pop();
         await docRef.delete();
-
-        // Delete the associated file from Firebase Storage
         const file = bucket.file(`syndication_documents/${fileName}`);
         await file.delete();
-
         res.status(200).json({ message: 'Document deleted successfully' });
     } catch (error) {
         console.error('Error deleting document:', error.message);
@@ -182,37 +160,30 @@ app.delete('/api/syndication/documents/:id', async (req, res) => {
     }
 });
 
-// Fetch Read-throughs
 app.get('/api/syndication/read-throughs', async (req, res) => {
     try {
         const readThroughsRef = db.collection('syndication_read-throughs');
         const snapshot = await readThroughsRef.get();
-
         const readThroughs = [];
         snapshot.forEach(doc => {
             readThroughs.push({ id: doc.id, ...doc.data() });
         });
-
-        res.json(readThroughs); // Always return the readThroughs array, even if empty
+        res.json(readThroughs);
     } catch (error) {
         console.error('Error fetching read-throughs:', error);
         res.status(500).json({ error: "Internal Error" });
     }
 });
 
-// Add or Update Read-through
 app.post('/api/syndication/read-throughs', async (req, res) => {
     try {
         const { id, title, url } = req.body;
-
         if (!title || !url) {
             res.status(400).json({ error: 'Title and URL are required' });
             return;
         }
-
         const docRef = id ? db.collection('syndication_read-throughs').doc(id) : db.collection('syndication_read-throughs').doc();
         await docRef.set({ title, url }, { merge: true });
-
         res.status(200).json({ message: 'Read-through added or updated successfully' });
     } catch (error) {
         console.error('Error adding or updating read-through:', error);
@@ -220,13 +191,11 @@ app.post('/api/syndication/read-throughs', async (req, res) => {
     }
 });
 
-// Delete Read-through
 app.delete('/api/syndication/read-throughs/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const docRef = db.collection('syndication_read-throughs').doc(id);
         await docRef.delete();
-
         res.status(200).json({ message: 'Read-through deleted successfully' });
     } catch (error) {
         console.error('Error deleting read-through:', error);
@@ -238,32 +207,26 @@ app.get('/api/syndication/watch-throughs', async (req, res) => {
     try {
         const watchThroughsRef = db.collection('syndication_watch-throughs');
         const snapshot = await watchThroughsRef.get();
-
         const watchThroughs = [];
         snapshot.forEach(doc => {
             watchThroughs.push({ id: doc.id, ...doc.data() });
         });
-
-        res.json(watchThroughs); // Always return the watchThroughs array, even if empty
+        res.json(watchThroughs);
     } catch (error) {
         console.error('Error fetching watch-throughs:', error);
         res.status(500).json({ error: "Internal Error" });
     }
 });
 
-// Add or Update Watch-through
 app.post('/api/syndication/watch-throughs', async (req, res) => {
     try {
         const { id, title, url } = req.body;
-
         if (!title || !url) {
             res.status(400).json({ error: 'Title and URL are required' });
             return;
         }
-
         const docRef = id ? db.collection('syndication_watch-throughs').doc(id) : db.collection('syndication_watch-throughs').doc();
         await docRef.set({ title, url }, { merge: true });
-
         res.status(200).json({ message: 'Watch-through added or updated successfully' });
     } catch (error) {
         console.error('Error adding or updating watch-through:', error);
@@ -271,13 +234,11 @@ app.post('/api/syndication/watch-throughs', async (req, res) => {
     }
 });
 
-// Delete Watch-through
 app.delete('/api/syndication/watch-throughs/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const docRef = db.collection('syndication_watch-throughs').doc(id);
         await docRef.delete();
-
         res.status(200).json({ message: 'Watch-through deleted successfully' });
     } catch (error) {
         console.error('Error deleting watch-through:', error);
@@ -285,23 +246,19 @@ app.delete('/api/syndication/watch-throughs/:id', async (req, res) => {
     }
 });
 
-// Fetch all resources
 app.get('/api/resources', async (req, res) => {
     try {
         const resourcesRef = db.collection('resources');
         const snapshot = await resourcesRef.orderBy('timestamp', 'asc').get();
-
         if (snapshot.empty) {
             console.log('No resources found');
             res.status(404).json({ error: 'No resources found' });
             return;
         }
-
         const resources = [];
         snapshot.forEach(doc => {
             resources.push({ id: doc.id, ...doc.data() });
         });
-
         res.json(resources);
     } catch (error) {
         console.error('Error fetching resources:', error);
@@ -309,78 +266,56 @@ app.get('/api/resources', async (req, res) => {
     }
 });
 
-// Add a new resource
 app.post('/api/new-resource', upload.single('file'), async (req, res) => {
     console.log('Request body:', req.body);
     console.log('Request file:', req.file);
-
     const { name, description } = req.body;
     const file = req.file;
-
     if (!name || !description || !file) {
         console.log('Missing required fields: name, description, or file');
         res.status(400).json({ error: 'Name, description, and file are required' });
         return;
     }
-
     const blob = bucket.file(`resources/${file.originalname}`);
     const blobStream = blob.createWriteStream({
-        metadata: {
-            contentType: file.mimetype
-        }
+        metadata: { contentType: file.mimetype }
     });
-
     blobStream.on('error', (err) => {
         console.error('Error uploading file:', err);
         res.status(500).json({ error: "Internal Error" });
     });
-
     blobStream.on('finish', async () => {
         try {
             const fileUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
             await blob.makePublic();
-
             const newResourceRef = db.collection('resources').doc();
             const timestamp = new Date();
-
-            await newResourceRef.set({
-                name,
-                description,
-                fileUrl,
-                timestamp
-            });
-
+            await newResourceRef.set({ name, description, fileUrl, timestamp });
             res.status(201).json({ message: 'Resource added successfully' });
         } catch (err) {
             console.error('Error finalizing resource upload:', err);
             res.status(500).json({ error: "Internal Error" });
         }
     });
-
     blobStream.end(file.buffer);
 });
 
-// Delete a resource
 app.delete('/api/delete-resource/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const resourceRef = db.collection('resources').doc(id);
         const resourceDoc = await resourceRef.get();
-
         if (!resourceDoc.exists) {
             console.log('Resource not found:', id);
             res.status(404).json({ error: 'Resource not found' });
             return;
         }
-
         const resourceData = resourceDoc.data();
         const fileUrl = resourceData.fileUrl;
         const fileName = fileUrl.split('/').pop().split('?')[0];
-
         await resourceRef.delete();
         const file = bucket.file(`resources/${fileName}`);
         await file.delete();
-
         res.status(200).json({ message: 'Resource deleted successfully' });
     } catch (error) {
         console.error('Error deleting resource:', error);
@@ -388,115 +323,155 @@ app.delete('/api/delete-resource/:id', async (req, res) => {
     }
 });
 
-
-/**
- * POST /api/announcements
- * Fetch all documents from the 'announcements' collection in Firestore.
- */
 app.post('/api/announcements', async (req, res) => {
     try {
         const announcementsRef = db.collection('announcements');
-        const snapshot = await announcementsRef.get();
-
+        const snapshot = await announcementsRef.orderBy('timestamp', 'desc').get();
         if (snapshot.empty) {
-            res.status(404).json({ error: 'No announcements found' });
+            res.json([]);
             return;
         }
-
         const announcements = [];
         snapshot.forEach(doc => {
-            announcements.push({ id: doc.id, ...doc.data() });
+            const data = doc.data();
+            const timestamp = data.timestamp?.toDate ? data.timestamp.toDate() : data.timestamp;
+            announcements.push({ id: doc.id, ...data, timestamp });
         });
-
         res.json(announcements);
     } catch (error) {
         console.error('Error fetching announcements:', error);
-        res.status(500).json({ error: "Internal Error" });
+        res.status(500).json({ error: "Internal Server Error fetching announcements" });
     }
 });
 
-/**
- * POST /api/new-announcement
- * Add a new announcement to the 'announcements' collection in Firestore.
- */
 app.post('/api/new-announcement', async (req, res) => {
+    let announcementId = null;
     try {
         const { title, content } = req.body;
         if (!title || !content) {
-            res.status(400).json({ error: 'Title and content are required' });
-            return;
+            return res.status(400).json({ error: 'Title and content are required' });
         }
 
         const newAnnouncementRef = db.collection('announcements').doc();
-        const currentDate = new Date();
-        const formattedDate = currentDate.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-        });
+        announcementId = newAnnouncementRef.id;
 
-        const formattedTime = currentDate.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true, // Use 12-hour format with AM/PM
-        });
-
-        const formattedTimestamp = `${formattedDate} ${formattedTime}`;
-
-        await newAnnouncementRef.set({
+        const newAnnouncementData = {
             title,
             content,
-            timestamp: formattedTimestamp,
+            timestamp: new Date()
+        };
+
+        await newAnnouncementRef.set(newAnnouncementData);
+        console.log(`Announcement ${announcementId} saved successfully.`);
+
+        if (!transporter) {
+            console.log(`Email transporter not configured. Skipping email notification for announcement ${announcementId}.`);
+        } else {
+            const emailsRef = db.collection('emails');
+            const emailSnapshot = await emailsRef.get();
+            const recipientEmails = [];
+            if (!emailSnapshot.empty) {
+                emailSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data && data.email) {
+                        recipientEmails.push(data.email);
+                    }
+                });
+            }
+
+            const logoFilename = 'realEstateLogo.png';
+            // IMPORTANT: Adjust this path relative to where your server script is running!
+            // If 'assets' folder is in the same directory as this script:
+            const logoPath = path.join(__dirname, 'images', logoFilename);
+            console.log(logoPath);
+            const logoCid = 'logo@realestateclub.gvsu';
+
+            if (recipientEmails.length > 0) {
+                console.log(`Preparing to send announcement email to ${recipientEmails.length} recipients.`);
+                const mailOptions = {
+                    from: `"GVSU Real Estate Club" <${process.env.GMAIL_EMAIL}>`,
+                    bcc: recipientEmails,
+                    subject: `New Announcement: ${title}`,
+                    html: `
+                        <div style="font-family: sans-serif; line-height: 1.6;">
+                            <p><b>Hello REC Members,</b></p>
+                            <p>A new announcement has been posted:</p>
+                            <hr style="border: none; border-top: 1px solid #eee;">
+                            <h2 style="color: #333;">${title}</h2>
+                            <p style="color: #555;">${content.replace(/\n/g, '<br>')}</p>
+                            <hr style="border: none; border-top: 1px solid #eee;">
+                            <br>
+                            <p style="font-size: 16px;"> If you have any questions or concerns, please contact:<br><br> <b>Caleb Ray</b> - <i>Membership Officer:</i> <a href="mailto:raycal@mail.gvsu.edu">raycal@mail.gvsu.edu</a> <br><br> or <br><br> <b>Sophie Buloss</b> - <i>Marketing Officer:</i> <a href="mailto:buloss@mail.gvsu.edu">buloss@mail.gvsu.edu</a></p>
+                            <div style="text-align: center; margin-top: 20px;">
+                        <img src="cid:${logoCid}" alt="GVSU Real Estate Club Logo" style="max-width: 300px; height: auto;">
+                        </div>
+                        </div>
+                    `,
+                    attachments: [
+                        {
+                            filename: logoFilename,
+                            path: logoPath,
+                            cid: logoCid // same cid value as in the html img src
+                        }
+                    ]
+                };
+
+                transporter.sendMail(mailOptions)
+                    .then(info => {
+                        console.log(`Announcement email sent successfully for ${announcementId}. Message ID: ${info.messageId}`);
+                    })
+                    .catch(emailError => {
+                        console.error(`Error sending announcement email for ${announcementId}:`, emailError);
+                    });
+
+            } else {
+                console.log(`No recipient emails found. Skipping email notification for announcement ${announcementId}.`);
+            }
+        }
+
+        res.status(201).json({
+            message: 'Announcement added successfully',
+            announcement: { id: announcementId, ...newAnnouncementData }
         });
 
-        res.status(201).json({ message: 'Announcement added successfully' });
     } catch (error) {
-        console.error('Error adding announcement:', error);
-        res.status(500).json({ error: "Internal Error" });
+        console.error(`Error processing new announcement (ID: ${announcementId || 'N/A'}):`, error);
+        res.status(500).json({ error: "Internal Server Error processing announcement" });
     }
 });
 
-/**
- * DELETE /api/delete-announcement/:id
- * Delete an announcement from the 'announcements' collection in Firestore.
- */
 app.delete('/api/delete-announcement/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        if (!id) {
+             return res.status(400).json({ error: 'Announcement ID is required.' });
+        }
         const announcementRef = db.collection('announcements').doc(id);
+        const doc = await announcementRef.get();
+
+        if (!doc.exists) {
+             return res.status(404).json({ error: 'Announcement not found.' });
+        }
+
         await announcementRef.delete();
+        console.log(`Deleted announcement ${id}`);
 
-        // Fetch updated list of announcements
-        const announcementsRef = db.collection('announcements');
-        const snapshot = await announcementsRef.get();
+        res.status(200).json({ message: 'Announcement deleted successfully', id: id });
 
-        const announcements = [];
-        snapshot.forEach(doc => {
-            announcements.push({ id: doc.id, ...doc.data() });
-        });
-
-        res.json(announcements);
     } catch (error) {
         console.error('Error deleting announcement:', error);
-        res.status(500).json({ error: "Internal Error" });
+        res.status(500).json({ error: "Internal Server Error deleting announcement" });
     }
 });
 
-/**
- * POST /api/get-admin-password
- * Fetch the admin password from the 'userProfile' collection in Firestore.
- */
 app.post('/api/get-admin-password', async (req, res) => {
     try {
         const userProfileRef = db.collection('userProfile').doc('adminAccount');
         const doc = await userProfileRef.get();
-
         if (!doc.exists) {
             res.status(404).json({ error: 'Admin account not found' });
             return;
         }
-
         const data = doc.data();
         res.json({ password: data.password });
     } catch (error) {
@@ -505,35 +480,21 @@ app.post('/api/get-admin-password', async (req, res) => {
     }
 });
 
-/**
- * GET /api/home-content
- * Fetch the home content from the 'home' collection in Firestore.
- */
 app.get('/api/home-content', async (req, res) => {
     try {
         const homeContentRef = db.collection('home').doc('homeContent');
         const ourMissionRef = db.collection('home').doc('ourMission');
-
         const [homeContentDoc, ourMissionDoc] = await Promise.all([homeContentRef.get(), ourMissionRef.get()]);
-
         if (!homeContentDoc.exists || !ourMissionDoc.exists) {
             res.status(404).json({ error: 'Home content not found' });
             return;
         }
-
         const homeContent = homeContentDoc.data();
         const ourMission = ourMissionDoc.data();
-
         res.json({
             welcomeMessage: homeContent.welcomeMessage,
-            nextMeeting: {
-                title: homeContent.title,
-                content: homeContent.content
-            },
-            mission: {
-                title: ourMission.title,
-                content: ourMission.content
-            }
+            nextMeeting: { title: homeContent.title, content: homeContent.content },
+            mission: { title: ourMission.title, content: ourMission.content }
         });
     } catch (error) {
         console.error('Error fetching home content:', error);
@@ -541,28 +502,20 @@ app.get('/api/home-content', async (req, res) => {
     }
 });
 
-/**
- * POST /api/update-home-content
- * Update the home content in the 'home' collection in Firestore.
- */
 app.post('/api/update-home-content', async (req, res) => {
     try {
         const { welcomeMessage, nextMeeting, mission } = req.body;
-
         const homeContentRef = db.collection('home').doc('homeContent');
         const ourMissionRef = db.collection('home').doc('ourMission');
-
         await homeContentRef.set({
-            welcomeMessage, // Ensure welcomeMessage is being saved correctly
+            welcomeMessage,
             title: nextMeeting.title,
             content: nextMeeting.content
         }, { merge: true });
-
         await ourMissionRef.set({
             title: mission.title,
             content: mission.content
         }, { merge: true });
-
         res.status(200).json({ message: 'Home content updated successfully' });
     } catch (error) {
         console.error('Error updating home content:', error);
@@ -570,24 +523,17 @@ app.post('/api/update-home-content', async (req, res) => {
     }
 });
 
-/**
- * GET /api/about
- * Fetch all documents from the 'about' collection in Firestore.
- */
 app.get('/api/about', async (req, res) => {
     try {
         const aboutRef = db.collection('about');
         const snapshot = await aboutRef.get();
-
         if (snapshot.empty) {
             res.status(404).json({ error: 'No about content found' });
             return;
         }
-
         const aboutContent = [];
         let title = '';
         let content = '';
-
         snapshot.forEach(doc => {
             if (doc.id === 'aboutTitle') {
                 title = doc.data().title;
@@ -596,10 +542,7 @@ app.get('/api/about', async (req, res) => {
                 aboutContent.push({ id: doc.id, ...doc.data() });
             }
         });
-
-        // Sort members by order field
         aboutContent.sort((a, b) => a.order - b.order);
-
         res.json({ title, content, members: aboutContent });
     } catch (error) {
         console.error('Error fetching about content:', error);
@@ -607,17 +550,11 @@ app.get('/api/about', async (req, res) => {
     }
 });
 
-/**
- * POST /api/update-about-title
- * Update the about title and content in Firestore.
- */
 app.post('/api/update-about-title', async (req, res) => {
     try {
         const { title, content } = req.body;
         const aboutTitleRef = db.collection('about').doc('aboutTitle');
-
         await aboutTitleRef.set({ title, content }, { merge: true });
-
         res.status(200).json({ message: 'About title updated successfully' });
     } catch (error) {
         console.error('Error updating about title:', error);
@@ -625,63 +562,34 @@ app.post('/api/update-about-title', async (req, res) => {
     }
 });
 
-/**
- * POST /api/new-member
- * Add a new member profile to Firestore.
- */
 app.post('/api/new-member', upload.single('image'), async (req, res) => {
     try {
         const { name, title, email, description, order } = req.body;
         const file = req.file;
-
         if (!name || !title || !email || !description || !file) {
             res.status(400).json({ error: 'All fields are required' });
             return;
         }
-
-        // Upload image to Firebase Storage
         const blob = bucket.file(`profiles/${file.originalname}`);
         const blobStream = blob.createWriteStream({
-            metadata: {
-                contentType: file.mimetype
-            }
+            metadata: { contentType: file.mimetype }
         });
-
         blobStream.on('error', (err) => {
             console.error('Error uploading file:', err);
             res.status(500).json({ error: "Internal Error" });
         });
-
         blobStream.on('finish', async () => {
             const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-
-            // Make the file publicly accessible
             await blob.makePublic();
-
-            // Save the member profile to Firestore
             const newMemberRef = db.collection('about').doc();
             await newMemberRef.set({
-                name,
-                title,
-                email,
-                description,
-                image: imageUrl,
-                order: parseInt(order, 10) // Ensure order is saved as a number
+                name, title, email, description, image: imageUrl, order: parseInt(order, 10)
             });
-
             const newMember = {
-                id: newMemberRef.id,
-                name,
-                title,
-                email,
-                description,
-                image: imageUrl,
-                order: parseInt(order, 10)
+                id: newMemberRef.id, name, title, email, description, image: imageUrl, order: parseInt(order, 10)
             };
-
             res.status(201).json(newMember);
         });
-
         blobStream.end(file.buffer);
     } catch (error) {
         console.error('Error adding new member:', error);
@@ -689,32 +597,21 @@ app.post('/api/new-member', upload.single('image'), async (req, res) => {
     }
 });
 
-/**
- * DELETE /api/delete-member/:id
- * Delete a member profile from Firestore and its associated image from Firebase Storage.
- */
 app.delete('/api/delete-member/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const memberRef = db.collection('about').doc(id);
         const memberDoc = await memberRef.get();
-
         if (!memberDoc.exists) {
             res.status(404).json({ error: 'Member not found' });
             return;
         }
-
         const memberData = memberDoc.data();
         const imageUrl = memberData.image;
-        const fileName = imageUrl.split('/').pop().split('?')[0]; // Extract file name from URL
-
-        // Delete the Firestore document
+        const fileName = imageUrl.split('/').pop().split('?')[0];
         await memberRef.delete();
-
-        // Delete the associated image from Firebase Storage
         const file = bucket.file(`profiles/${fileName}`);
         await file.delete();
-
         res.status(200).json({ message: 'Member deleted successfully' });
     } catch (error) {
         console.error('Error deleting member:', error);
@@ -722,49 +619,32 @@ app.delete('/api/delete-member/:id', async (req, res) => {
     }
 });
 
-/**
- * POST /api/update-member
- * Update a member profile in Firestore.
- */
 app.post('/api/update-member', upload.single('image'), async (req, res) => {
     try {
         const { id, name, title, email, description, order } = req.body;
         const file = req.file;
-
         if (!id || !name || !title || !email || !description || order === undefined) {
             res.status(400).json({ error: 'All fields are required' });
             return;
         }
-
         const memberRef = db.collection('about').doc(id);
         const memberData = { name, title, email, description, order: parseInt(order, 10) };
-
         if (file) {
-            // Upload new image to Firebase Storage
             const blob = bucket.file(`profiles/${file.originalname}`);
             const blobStream = blob.createWriteStream({
-                metadata: {
-                    contentType: file.mimetype
-                }
+                metadata: { contentType: file.mimetype }
             });
-
             blobStream.on('error', (err) => {
                 console.error('Error uploading file:', err);
                 res.status(500).json({ error: "Internal Error" });
             });
-
             blobStream.on('finish', async () => {
                 const imageUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-
-                // Make the file publicly accessible
                 await blob.makePublic();
-
                 memberData.image = imageUrl;
                 await memberRef.update(memberData);
-
                 res.status(200).json({ message: 'Member updated successfully' });
             });
-
             blobStream.end(file.buffer);
         } else {
             await memberRef.update(memberData);
@@ -776,12 +656,84 @@ app.post('/api/update-member', upload.single('image'), async (req, res) => {
     }
 });
 
-// Start the server
+app.get('/api/emails', async (req, res) => {
+    console.log("making email api call")
+    try {
+      const emailsRef = db.collection('emails');
+      console.log(emailsRef)
+      const snapshot = await emailsRef.get();
+      const emailsList = [];
+      if (snapshot.empty) {
+        console.log('No documents found in the emails collection.');
+        res.json(emailsList);
+        return;
+      }
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data && data.email) {
+          emailsList.push(data.email);
+        } else {
+          console.warn(`Document ${doc.id} in 'emails' collection is missing the 'email' field.`);
+        }
+      });
+      res.json(emailsList);
+    } catch (error) {
+      console.error('Error fetching emails:', error);
+      res.status(500).json({ error: "Internal Server Error fetching emails" });
+    }
+  });
+
+  app.post('/api/emails', async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email || typeof email !== 'string' || !email.includes('@')) {
+        return res.status(400).json({ error: 'Valid email address is required.' });
+      }
+      const normalizedEmail = email.trim().toLowerCase();
+      const emailsRef = db.collection('emails');
+      const querySnapshot = await emailsRef.where('email', '==', normalizedEmail).limit(1).get();
+      if (!querySnapshot.empty) {
+        return res.status(409).json({ error: 'Email address already exists.' });
+      }
+      const newEmailRef = emailsRef.doc();
+      await newEmailRef.set({
+        email: normalizedEmail,
+        addedAt: new Date()
+      });
+      console.log(`Added new email: ${normalizedEmail}`);
+      res.status(201).json({ message: 'Email added successfully', email: normalizedEmail });
+    } catch (error) {
+      console.error('Error adding email:', error);
+      res.status(500).json({ error: 'Internal Server Error adding email.' });
+    }
+  });
+
+  app.delete('/api/emails', async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email || typeof email !== 'string' || !email.includes('@')) {
+        return res.status(400).json({ error: 'Valid email address to delete is required in the request body.' });
+      }
+      const normalizedEmail = email.trim().toLowerCase();
+      const emailsRef = db.collection('emails');
+      const querySnapshot = await emailsRef.where('email', '==', normalizedEmail).limit(1).get();
+      if (querySnapshot.empty) {
+        return res.status(404).json({ error: 'Email address not found.' });
+      }
+      const docToDelete = querySnapshot.docs[0];
+      await docToDelete.ref.delete();
+      console.log(`Deleted email: ${normalizedEmail} (Doc ID: ${docToDelete.id})`);
+      res.status(200).json({ message: 'Email deleted successfully', email: normalizedEmail });
+    } catch (error) {
+      console.error('Error deleting email:', error);
+      res.status(500).json({ error: 'Internal Server Error deleting email.' });
+    }
+  });
+
 const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
 
-// Graceful shutdown
 const shutdown = () => {
     console.log('Shutting down server...');
     server.close(() => {
@@ -789,13 +741,11 @@ const shutdown = () => {
         process.exit(0);
     });
 
-    // Force shutdown after 10 seconds
     setTimeout(() => {
         console.error('Forcing shutdown');
         process.exit(1);
     }, 10000);
 };
 
-// Handle termination signals
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);

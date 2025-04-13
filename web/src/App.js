@@ -104,6 +104,7 @@ function Tabs() {
   const location = useLocation();
 
   // Define base CSS classes applied to all tabs for consistency
+  // RE-ADDED flex-1: Allows tabs in each row to grow and fill the available width for that row.
   // Increased border thickness to 4px (border-b-4)
   const baseTabClasses = 'flex-1 px-4 py-2 md:py-4 text-center bg-dark-gray text-white border-b-4 transition-colors duration-200 ease-in-out whitespace-nowrap'; // Kept border-b-4
 
@@ -116,10 +117,11 @@ function Tabs() {
   };
 
   return (
-    // Container for the tabs, allowing horizontal scroll on smaller screens if needed
-    <div className="flex w-full overflow-x-auto no-scrollbar">
+    // Container for the tabs:
+    // Uses flex-wrap to allow wrapping onto multiple lines.
+    <div className="flex flex-wrap w-full">
        {/* Navigation links for each section */}
-       {/* Each Link combines base classes with the dynamic active border class */}
+       {/* Each Link combines base classes (including flex-1) with the dynamic active border class */}
       <Link to="/" className={`${baseTabClasses} ${getActiveBorderClass('/')}`}>Home</Link>
       <Link to="/announcements" className={`${baseTabClasses} ${getActiveBorderClass('/announcements')}`}>Announcements</Link>
       <Link to="/syndication" className={`${baseTabClasses} ${getActiveBorderClass('/syndication')}`}>Syndication Project</Link>

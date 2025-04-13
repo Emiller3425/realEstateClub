@@ -28,7 +28,7 @@ import image12 from "../images/12.jpeg";
 import image13 from "../images/13.jpeg";
 import image14 from "../images/14.jpeg";
 import image15 from "../images/15.jpeg";
-
+//
 
 
 // Function to shuffle the array

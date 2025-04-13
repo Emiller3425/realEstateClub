@@ -97,6 +97,7 @@ function App() {
   );
 }
 
+//
 // Tabs Component: Renders the navigation links
 function Tabs() {
   // Get the current location object to determine the active path

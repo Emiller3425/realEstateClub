@@ -13,7 +13,7 @@ const app = express();
 const port = process.env.PORT || 5001;
 
 app.use(cors({
-   origin: ['http://localhost:3000', 'https://realestateclubgvsu.com', 'https://real-estate-club.vercel.app'],
+   origin: ['http://localhost:3000', 'https://gvsurealestateclub.com', 'https://real-estate-club.vercel.app'],
 }));
 
 app.use(bodyParser.json());

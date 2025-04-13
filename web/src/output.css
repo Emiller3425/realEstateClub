@@ -83,6 +83,11 @@
   background-color: rgb(0 160 256 / var(--tw-bg-opacity)); /* Navy color */
 }
 
+.border-navy {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 160 256 / var(--tw-bg-opacity)); /* Navy color */
+}
+
 .bg-dark-gray {
   --tw-bg-opacity: 1;
   background-color: rgb(48 48 48 / var(--tw-bg-opacity)); /* Dark gray color */

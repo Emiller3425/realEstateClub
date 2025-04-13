@@ -67,7 +67,7 @@ export default function Announcements({ adminAccess }) {
 
   const API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:5001/api'
-    : (window.location.hostname === 'https://gvsurealestateclub.com'
+    : (window.location.hostname === 'gvsurealestateclub.com'
       ? 'https://gvsurealestateclub.com/api'
       : 'https://real-estate-club.vercel.app/api');
 

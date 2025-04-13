@@ -8,6 +8,7 @@ web/node_modules/.cache
 .pnp.js
 node_modules/.cache
 web/node_modules/.cache/default-development/3.pack
+web/node_modules/.cache/.eslintcache
 
 # testing
 /coverage

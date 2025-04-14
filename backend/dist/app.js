@@ -29,6 +29,8 @@ if (process.env.GMAIL_EMAIL && process.env.GMAIL_APP_PASSWORD) {
             user: process.env.GMAIL_EMAIL,
             pass: process.env.GMAIL_APP_PASSWORD
         },
+        connectionTimeout: 10000, // Increase connection timeout to 10 seconds (default is often lower)
+        socketTimeout: 15000, 
         tls: {
             // rejectUnauthorized: false
         }

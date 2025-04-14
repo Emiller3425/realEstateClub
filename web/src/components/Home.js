@@ -22,7 +22,6 @@ import image6 from "../images/6.jpeg";
 import image7 from "../images/7.jpeg";
 import image8 from "../images/8.jpeg";
 import image9 from "../images/9.jpeg";
-import image10 from "../images/10.jpeg";
 import image11 from "../images/11.jpeg";
 import image12 from "../images/12.jpeg";
 import image13 from "../images/13.jpeg";
@@ -91,7 +90,7 @@ const Home = ({ adminAccess }) => {
     fetchData();
 
     // Shuffle the images array and set it to state
-    const images = [seidman, devTour, event1, event3, event4, event5, event6, event7, event8, devTour2, devTourFunny, image0, image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15];
+    const images = [seidman, devTour, event1, event3, event4, event5, event6, event7, event8, devTour2, devTourFunny, image0, image1, image2, image3, image4, image5, image6, image7, image8, image9, image11, image12, image13, image14, image15];
     setShuffledImages(shuffle([...images]));
 
     // Set an interval to change the image in the slideshow every 4 seconds

@@ -11,7 +11,8 @@
     "build-backend": "npm --prefix backend run build"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "cpx": "^1.5.0"
   },
   "dependencies": {
     "dotenv": "^16.5.0",

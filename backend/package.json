@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node dist/app.js",
-    "dev": "nodemon src/app.ts",
+    "dev": "cpx \"config/**/*.json\" src/config && nodemon src/app.ts",
     "clean": "rimraf dist",
     "build": "npm run clean && tsc && cpx \"config/**/*.json\" dist/config"
   },

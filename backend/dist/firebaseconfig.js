@@ -14,6 +14,6 @@ firebase_admin_1.default.initializeApp({
 // Get a reference to the Firestore service
 const db = firebase_admin_1.default.firestore();
 exports.db = db;
-
+// comment so i can push
 const bucket = firebase_admin_1.default.storage().bucket();
 exports.bucket = bucket;
